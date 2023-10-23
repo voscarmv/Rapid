@@ -1,0 +1,67 @@
+Paste this on https://csacademy.com/app/graph_editor/
+
+dataloader
+editor
+filters
+imagery
+l10n
+locations
+map
+map3d
+photos
+presets
+rapid
+storage
+ui
+uploader
+urlhash
+validator
+editor imagery
+editor map
+editor photos
+editor storage
+filters editor
+filters storage
+filters urlhash
+imagery dataloader
+imagery editor
+imagery l10n
+imagery map
+imagery urlhash
+locations dataloader
+locations presets
+locations urlhash
+map3d map
+map editor
+map filters
+map imagery
+map photos
+map storage
+map l10n
+map urlhash
+photos map
+photos urlhash
+presets dataloader
+presets l10n
+presets locations
+presets storage
+presets urlhash
+rapid editor
+rapid l10n
+rapid urlhash
+ui editor
+ui imagery
+ui l10n
+ui map
+ui storage
+ui urlhash
+uploader dataloader
+uploader editor
+uploader l10n
+urlhash editor
+urlhash l10n
+urlhash map
+validator editor
+validator storage
+validator map
+validator urlhash
