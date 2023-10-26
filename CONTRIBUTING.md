@@ -12,11 +12,24 @@ We actively welcome your pull requests.
 
 ### Forking, cloning and running Rapid
 
-### How to add tests
+- Make sure to use the latest `node` with something like  `nvm install node`
+- Run `npm run all`
+- Run `npm run quickstart` to start the server
+
+### Debugging and testing
+
+- In VSCode go to Run>Add Configuration... and select Launch Chrome
+- Examples of breakpoints
+- Conditional breakpoints
+- Some interesting files to break (init, etc)
 
 ### Updating API documentation
 
+- run `npm run docs`
+
 ### Linting
+
+- Run `npm run lint`
 
 ## Contributor License Agreement ("CLA")
 In order to accept your pull request, we need you to submit a CLA. You only need
