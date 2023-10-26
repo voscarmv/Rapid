@@ -5302,61 +5302,3156 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="AbstractLayer.html">Class: AbstractLayer</h1>
         
 
 
+
+<section>
+    
+<header>
+    <div class="header content-size">
+        <h2>AbstractLayer
+        </h2>
+        
+            <div class="class-description"><p>AbstractLayer is the base class from which all Layers inherit.
+It creates a container to hold the Layer data.</p>
+<p>Notes on identifiers:</p>
+<ul>
+<li><code>layerID</code> - A unique identifier for the layer, for example 'osm'</li>
+<li><code>featureID</code> - A unique identifier for the feature, for example 'osm-w-123-fill'</li>
+<li><code>dataID</code> - A feature may have data bound to it, for example OSM identifier like 'w-123'</li>
+<li><code>classID</code> - A class identifier like 'hovered' or 'selected'</li>
+</ul>
+<p>Properties you can access:
+<code>id</code>           Unique string to use for the name of this Layer
+<code>supported</code>    Is this Layer supported? (i.e. do we even show it in lists?)
+<code>zIndex</code>       Where this Layer sits compared to other Layers
+<code>enabled</code>      Whether the the user has chosen to see the Layer
+<code>features</code>     <code>Map(featureID -&gt; Feature)</code> of all features on this Layer
+<code>retained</code>     <code>Map(featureID -&gt; Integer frame)</code> last seen</p></div>
+        
+    </div>
+</header>  
+
+<article class="content-size">
+    
+        <div class="container-overview">
+        
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="AbstractLayer">
+            <a class="share-icon" href="#AbstractLayer"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                new AbstractLayer
+            </span>
+            <span class="signature">(scene, layerID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line27">AbstractLayer.js:27</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>scene</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The Scene that owns this Layer</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>layerID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Unique string to use for the name of this Layer</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+        </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Classes</h3>
+        
+        <dl class="clearfix summary-list list-classes">
+            <dt class=""><a href="AbstractLayer.html">AbstractLayer</a></dt>
+            
+        </dl>
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl class="list-members">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="enabled">
+            <a class="share-icon" href="#enabled"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">enabled</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>enabled
+Whether the user has chosen to see the Layer</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="id">
+            <a class="share-icon" href="#id"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">id</span>
+            
+            
+            <span class="access-signature">readonly</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Layer id</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="supported">
+            <a class="share-icon" href="#supported"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">supported</span>
+            
+            
+            <span class="access-signature">abstract</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>supported
+Is this Layer supported? (i.e. do we even show it in lists?)
+Can be overridden in a subclass with additional logic</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl class="list-methods">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addChildData">
+            <a class="share-icon" href="#addChildData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                addChildData
+            </span>
+            <span class="signature">(parentID, childID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line241">AbstractLayer.js:241</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>addChildData
+Adds a mapping from parent data to child data.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>parentID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID of the parent (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>childID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID of the child (e.g. 'w123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addFeature">
+            <a class="share-icon" href="#addFeature"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                addFeature
+            </span>
+            <span class="signature">(feature)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line107">AbstractLayer.js:107</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>addFeature
+Add a feature to the layer cache.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>feature</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A Feature derived from <code>AbstractFeature</code> (point, line, multipolygon)</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="bindData">
+            <a class="share-icon" href="#bindData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                bindData
+            </span>
+            <span class="signature">(featureID, dataID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line194">AbstractLayer.js:194</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>bindData
+Adds (or replaces) a data binding from featureID to a dataID</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>featureID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> featureID  (e.g. 'osm-w-123-fill')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID     (e.g. 'w-123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="classData">
+            <a class="share-icon" href="#classData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                classData
+            </span>
+            <span class="signature">(dataID, classID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line381">AbstractLayer.js:381</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>classData
+Sets a dataID as being classed a certain way (e.g. 'hovered')</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>classID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> classID (e.g. 'hovered')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="clearChildData">
+            <a class="share-icon" href="#clearChildData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                clearChildData
+            </span>
+            <span class="signature">(parentID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line291">AbstractLayer.js:291</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>clearChildData
+Removes all child dataIDs for the given parent dataID</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>parentID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="clearClass">
+            <a class="share-icon" href="#clearClass"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                clearClass
+            </span>
+            <span class="signature">(classID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line428">AbstractLayer.js:428</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>clearClass
+Clear out all uses of the given classID.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>classID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> classID (e.g. 'hovered')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="cull">
+            <a class="share-icon" href="#cull"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                cull
+            </span>
+            <span class="signature">(frame)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line86">AbstractLayer.js:86</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>cull
+Make invisible any Features that were not seen during the current frame</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>frame</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Integer frame being rendered</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="dirtyData">
+            <a class="share-icon" href="#dirtyData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                dirtyData
+            </span>
+            <span class="signature">(dataIDs)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line468">AbstractLayer.js:468</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>dirtyData
+Mark any features bound to a given dataID as <code>dirty</code>
+During the next &quot;app&quot; pass, dirty features will be rebuilt.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataIDs</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A <code>Set</code> or <code>Array</code> of dataIDs, or single <code>String</code> dataID</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="dirtyFeatures">
+            <a class="share-icon" href="#dirtyFeatures"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                dirtyFeatures
+            </span>
+            <span class="signature">(featureIDs)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line453">AbstractLayer.js:453</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>dirtyFeatures
+Mark specific features features as <code>dirty</code>
+During the next &quot;app&quot; pass, dirty features will be rebuilt.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>featureIDs</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A <code>Set</code> or <code>Array</code> of featureIDs, or single <code>String</code> featureID</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="dirtyLayer">
+            <a class="share-icon" href="#dirtyLayer"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                dirtyLayer
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line441">AbstractLayer.js:441</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>dirtyLayer
+Mark all features on this layer as <code>dirty</code>.
+During the next &quot;app&quot; pass, dirty features will be rebuilt.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getSelfAndAncestors">
+            <a class="share-icon" href="#getSelfAndAncestors"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                getSelfAndAncestors
+            </span>
+            <span class="signature">(dataID, result?)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line331">AbstractLayer.js:331</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>getSelfAndAncestors
+Recursively get a result <code>Set</code> including the given dataID and all dataIDs in the parent hierarchy</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'n123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result?</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>Set</code> containing the results (e.g. ['n123','w123','r123'])</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
     
 
 
-    <h3> </h3>
+
+<code>Set</code> including the dataID and all dataIDs in the parent hierarchy
 
 
+    
+    
+    
+</dd>
 
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getSelfAndDescendants">
+            <a class="share-icon" href="#getSelfAndDescendants"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                getSelfAndDescendants
+            </span>
+            <span class="signature">(dataID, result?)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line306">AbstractLayer.js:306</a>
+        </div>
+        
+    </div>
 
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>getSelfAndDescendants
+Recursively get a result <code>Set</code> including the given dataID and all dataIDs in the child hierarchy.</p>
+    </div>
+    
 
+    
+    
+    
+    
+    
+        
 
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result?</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>Set</code> containing the results (e.g. ['r123','w123','n123'])</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
+    
+    
 
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
     
 
 
 
+<code>Set</code> including the dataID and all dataIDs in the child hierarchy
 
-    <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
-    </section>
 
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getSelfAndSiblings">
+            <a class="share-icon" href="#getSelfAndSiblings"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                getSelfAndSiblings
+            </span>
+            <span class="signature">(dataID, result?)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line356">AbstractLayer.js:356</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>getSelfAndSiblings
+Get a result <code>Set</code> including the dataID and all sibling dataIDs in the parent-child hierarchy</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'n123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result?</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>Set</code> containing the results (e.g. ['n121','n122','n123','n124'])</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+
+<code>Set</code> including the dataID and all dataIDs adjacent in the parent-child hierarchy
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="isDrawing">
+            <a class="share-icon" href="#isDrawing"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                isDrawing
+            </span>
+            <span class="signature">(dataId)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line172">AbstractLayer.js:172</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>isDrawing</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataId</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>'String' dataID (e.g. 'w-123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+
+true or false
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="isHovered">
+            <a class="share-icon" href="#isHovered"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                isHovered
+            </span>
+            <span class="signature">(dataId)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line182">AbstractLayer.js:182</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>isHovered</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataId</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>'String' dataID (e.g. 'w-123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+
+true or false
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="removeChildData">
+            <a class="share-icon" href="#removeChildData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                removeChildData
+            </span>
+            <span class="signature">(parentID, childID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line264">AbstractLayer.js:264</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>removeChildData
+Removes mapping from parent data to child data.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>parentID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>childID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID to remove as a child (e.g. 'w1')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="removeFeature">
+            <a class="share-icon" href="#removeFeature"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                removeFeature
+            </span>
+            <span class="signature">(feature)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line117">AbstractLayer.js:117</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>removeFeature
+Remove a Feature from the layer cache.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>feature</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A Feature derived from <code>AbstractFeature</code> (point, line, multipolygon)</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="render">
+            <a class="share-icon" href="#render"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                render
+            </span>
+            <span class="signature">(frame, projection, zoom)</span>
+            
+            <span class="access-signature">abstract</span>
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line77">AbstractLayer.js:77</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>render
+Every Layer should have a render function that manages the Features in view.
+Override in a subclass with needed logic. It will be passed:</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>frame</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Integer frame being rendered</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>projection</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Pixi projection to use for rendering</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>zoom</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Effective zoom to use for rendering</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="retainFeature">
+            <a class="share-icon" href="#retainFeature"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                retainFeature
+            </span>
+            <span class="signature">(feature, frame)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line131">AbstractLayer.js:131</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>retainFeature
+Retain the feature for the given frame.
+Features that are not retained may be automatically culled (made invisible) or removed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>feature</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A Feature derived from <code>AbstractFeature</code> (point, line, multipolygon)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>frame</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Integer frame being rendered</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="syncFeatureClasses">
+            <a class="share-icon" href="#syncFeatureClasses"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                syncFeatureClasses
+            </span>
+            <span class="signature">(feature)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line153">AbstractLayer.js:153</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>syncFeatureClasses
+Set the feature's various state properties (e.g. selected, hovered, etc.)
+Counterintuitively, the Layer needs to be the source of truth for these properties,
+because a Feature can be &quot;selected&quot; or &quot;drawing&quot; even before it has been created.</p>
+<p>Setting these state properties may dirty the feature if the it causes the state to change.
+Therefore this should be called after the Feature has been created but before any updates happen.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>feature</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A Feature derived from <code>AbstractFeature</code> (point, line, multipolygon)</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="unbindData">
+            <a class="share-icon" href="#unbindData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                unbindData
+            </span>
+            <span class="signature">(featureID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line213">AbstractLayer.js:213</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>unbindData
+Removes the data binding for a given featureID</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>featureID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> featureID  (e.g. 'osm-w-123-fill')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="unclassData">
+            <a class="share-icon" href="#unclassData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                unclassData
+            </span>
+            <span class="signature">(dataID, classID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractLayer.js.html#line404">AbstractLayer.js:404</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>unclassData
+Unsets a dataID from being classed a certain way (e.g. 'hovered')</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>classID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> classID (e.g. 'hovered')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+
+    
+</article>
+
+</section>  
 
 
 

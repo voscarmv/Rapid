@@ -5302,59 +5302,226 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="ui_rapid_poweruser_features_dialog.js.html">Source: ui/rapid_poweruser_features_dialog.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>ui/rapid_poweruser_features_dialog.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { select as d3_select } from 'd3-selection';
+
+import { uiModal } from './modal';
+
+
+export function uiRapidPowerUserFeaturesDialog(context) {
+  const l10n = context.systems.l10n;
+  const rapid = context.systems.rapid;
+  const storage = context.systems.storage;
+  const urlhash = context.systems.urlhash;
+
+  const featureFlags = [
+    'previewDatasets', 'tagnosticRoadCombine', 'tagSources', 'showAutoFix', 'allowLargeEdits'
+  ];
+
+  let _modalSelection = d3_select(null);
+  let _content = d3_select(null);
+  context.systems.urlhash.on('hashchange', updatePowerUserKeys);
+
+
+  /**
+   * On any change in poweruser setting, update the storage keys.
+   * If user is not currently a poweruser, move all the feature flags to a different keyspace
+   * @param  currParams   Map(key -> value) of the current hash parameters
+   * @param  prevParams   Map(key -> value) of the previous hash parameters
+   */
+  function updatePowerUserKeys(currParams, prevParams) {
+    let needsUpdate = true;
+    if (currParams &amp;&amp; prevParams) {
+      needsUpdate = currParams.get('poweruser') !== prevParams.get('poweruser');
+    }
+    if (!needsUpdate) return;
+
+
+    const isPowerUser = urlhash.getParam('poweruser') === 'true';
+    if (!isPowerUser) {
+      for (const featureFlag of featureFlags) {
+        const val = storage.getItem(`rapid-internal-feature.${featureFlag}`);
+        if (val) {
+          storage.setItem(`rapid-internal-feature.was.${featureFlag}`, val);
+          storage.removeItem(`rapid-internal-feature.${featureFlag}`);
+        }
+      }
+    } else {
+      for (const featureFlag of featureFlags) {
+        const val = storage.getItem(`rapid-internal-feature.was.${featureFlag}`);
+        if (val) {
+          storage.setItem(`rapid-internal-feature.${featureFlag}`, val);
+          storage.removeItem(`rapid-internal-feature.was.${featureFlag}`);
+        }
+      }
+    }
+  }
+
+
+  function isEnabled(featureFlag) {
+    return storage.getItem(`rapid-internal-feature.${featureFlag}`) === 'true';
+  }
+
+
+  function toggleFeature(_, featureFlag) {
+    let enabled = storage.getItem(`rapid-internal-feature.${featureFlag}`) === 'true';
+    enabled = !enabled;
+    storage.setItem(`rapid-internal-feature.${featureFlag}`, enabled);
+
+    // custom on-toggle behaviors can go here
+    if (featureFlag === 'previewDatasets' &amp;&amp; !enabled) {   // if user unchecked previewDatasets feature
+      for (const dataset of rapid.datasets.values()) {
+        if (dataset.beta) {
+          dataset.added = false;
+          dataset.enabled = false;
+        }
+      }
+      context.enter('browse');   // return to browse mode (in case something was selected)
+      context.systems.map.immediateRedraw();
+    }
+  }
+
+
+  return (selection) => {
+    updatePowerUserKeys();
+
+    _modalSelection = uiModal(selection);
+
+    _modalSelection.select('.modal')
+      .attr('class', 'modal rapid-modal');   // Rapid styling
+
+    _content = _modalSelection.select('.content')
+      .append('div')
+      .attr('class', 'rapid-stack poweruser');
+
+    _content
+      .call(renderModalContent);
+
+    _content.selectAll('.ok-button')
+      .node()
+      .focus();
+  };
+
+
+  function renderModalContent(selection) {
+    /* Header */
+    let headerEnter = selection.selectAll('.modal-section-heading')
+      .data([0])
+      .enter()
+      .append('div')
+      .attr('class', 'modal-section-heading');
+
+    headerEnter
+      .append('h3')
+      .attr('class', 'modal-heading')
+      .html(l10n.t('rapid_poweruser_features.heading.label'));
+
+    headerEnter
+      .append('div')
+      .attr('class', 'modal-heading-desc')
+      .text(l10n.t('rapid_poweruser_features.heading.description'))
+      .append('span')
+      .attr('class', 'smile')
+      .text('😎');
+
+
+    /* Features */
+    let features = selection.selectAll('.rapid-features-container')
+      .data([0]);
+
+    let featuresEnter = features.enter()
+      .append('div')
+      .attr('class', 'rapid-features-container');
+
+    features
+      .merge(featuresEnter)
+      .call(renderFeatures);
+
+
+    /* OK Button */
+    let buttonsEnter = selection.selectAll('.modal-section.buttons')
+      .data([0])
+      .enter()
+      .append('div')
+      .attr('class', 'modal-section buttons');
+
+    buttonsEnter
+      .append('button')
+      .attr('class', 'button ok-button action')
+      .on('click', () => _modalSelection.remove())
+      .text(l10n.t('confirm.okay'));
+  }
+
+
+  function renderFeatures(selection) {
+    let rows = selection.selectAll('.rapid-checkbox-feature')
+      .data(featureFlags, d => d);
+
+    // enter
+    let rowsEnter = rows.enter()
+      .append('div')
+      .attr('class', 'modal-section rapid-checkbox rapid-checkbox-feature');
+
+    rowsEnter
+      .append('div')
+      .attr('class', 'rapid-feature')
+      .each((d, i, nodes) => {
+        let selection = d3_select(nodes[i]);
+
+        // line1: Label
+        selection
+          .append('div')
+          .attr('class', 'rapid-feature-label')
+          .text(d => l10n.t(`rapid_poweruser_features.${d}.label`));
+
+        // line2: description
+        selection
+          .append('div')
+          .attr('class', 'rapid-feature-description')
+          .text(d => l10n.t(`rapid_poweruser_features.${d}.description`));
+      });
+
+    let inputsEnter = rowsEnter
+      .append('div')
+      .attr('class', 'rapid-checkbox-inputs');
+
+    let checkboxEnter = inputsEnter
+      .append('label')
+      .attr('class', 'rapid-checkbox-label');
+
+    checkboxEnter
+      .append('input')
+      .attr('type', 'checkbox')
+      .attr('class', 'rapid-feature-checkbox')
+      .on('click', toggleFeature);
+
+    checkboxEnter
+      .append('div')
+      .attr('class', 'rapid-checkbox-custom');
+
+
+    // update
+    rows = rows
+      .merge(rowsEnter);
+
+    rows.selectAll('.rapid-feature-checkbox')
+      .property('checked', isEnabled);
+  }
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5533,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

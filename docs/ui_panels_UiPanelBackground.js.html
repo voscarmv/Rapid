@@ -5302,59 +5302,235 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="ui_panels_UiPanelBackground.js.html">Source: ui/panels/UiPanelBackground.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>ui/panels/UiPanelBackground.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { select as d3_select } from 'd3-selection';
+import { Extent } from '@rapid-sdk/math';
+import debounce from 'lodash-es/debounce';
+
+import { AbstractUiPanel } from './AbstractUiPanel';
+
+const METADATA_KEYS = ['zoom', 'vintage', 'source', 'description', 'resolution', 'accuracy'];
+
+
+/**
+ * UiPanelBackground
+ */
+export class UiPanelBackground extends AbstractUiPanel {
+
+  /**
+   * @constructor
+   * @param  `context`  Global shared application context
+   */
+  constructor(context) {
+    super(context);
+    this.id = 'background';
+
+    const l10n = context.systems.l10n;
+    this.label = l10n.tHtml('info_panels.background.title');
+    this.key = l10n.t('info_panels.background.key');
+
+    this._selection = d3_select(null);
+    this._currSourceID = null;
+    this._metadata = {};
+
+    // Ensure methods used as callbacks always have `this` bound correctly.
+    // (This is also necessary when using `d3-selection.call`)
+    this.render = this.render.bind(this);
+    this.updateMetadata = this.updateMetadata.bind(this);
+    this._deferredRender = debounce(this.render, 250);
+    this._deferredUpdateMetadata = debounce(this.updateMetadata, 250);
+  }
+
+
+  /**
+   * enable
+   * @param  `selection`  A d3-selection to a `div` that the panel should render itself into
+   */
+  enable(selection) {
+    if (this._enabled) return;
+
+    this._enabled = true;
+    this._selection = selection;
+    this._currSourceID = null;
+    this._metadata = {};
+
+    this.context.systems.map
+      .on('draw', this._deferredRender)
+      .on('move', this._deferredUpdateMetadata);
+  }
+
+
+  /**
+   * disable
+   */
+  disable() {
+    if (!this._enabled) return;
+
+    this._deferredRender.cancel();
+    this._deferredUpdateMetadata.cancel();
+
+    this._selection.html('');  // empty DOM
+
+    this._enabled = false;
+    this._selection = d3_select(null);
+    this._currSourceID = null;
+    this._metadata = {};
+
+    this.context.systems.map
+      .off('draw', this._deferredRender)
+      .off('move', this._deferredUpdateMetadata);
+  }
+
+
+  /**
+   * render
+   */
+  render() {
+    if (!this._enabled) return;
+
+    const context = this.context;
+    const selection = this._selection;
+    const imagery = context.systems.imagery;
+    const l10n = context.systems.l10n;
+
+    const source = imagery.baseLayerSource();
+    if (!source) return;
+
+    // Empty out metadata if source has changed..
+    if (this._currSourceID !== source.id) {
+      this._currSourceID = source.id;
+      this._metadata = {};
+    }
+
+    // Empty out the DOM content and rebuild from scratch..
+    selection.html('');
+
+    let list = selection
+      .append('ul')
+      .attr('class', 'background-info');
+
+    list
+      .append('li')
+      .html(source.label);
+
+    // Add list items for all the imagery metadata
+    METADATA_KEYS.forEach(k => {
+      list
+        .append('li')
+        .attr('class', `background-info-list-${k}`)
+        .classed('hide', !this._metadata[k])
+        .html(l10n.tHtml(`info_panels.background.${k}`) + ':')
+        .append('span')
+        .attr('class', `background-info-span-${k}`)
+        .text(this._metadata[k]);
+    });
+
+    this._deferredUpdateMetadata();
+
+    // Add buttons
+    const toggleTiles = context.getDebug('tile') ? 'hide_tiles' : 'show_tiles';
+
+    selection
+      .append('a')
+      .html(l10n.tHtml(`info_panels.background.${toggleTiles}`))
+      .attr('href', '#')
+      .attr('class', 'button button-toggle-tiles')
+      .on('click', e => {
+        e.preventDefault();
+        context.setDebug('tile', !context.getDebug('tile'));
+        this.render();
+      });
+  }
+
+
+  /**
+   * updateMetadata
+   */
+  updateMetadata() {
+    if (!this._enabled) return;
+
+    const context = this.context;
+    const selection = this._selection;
+    const imagery = context.systems.imagery;
+    const l10n = context.systems.l10n;
+
+    const source = imagery.baseLayerSource();
+    if (!source) return;
+
+    // Empty out metadata if source has changed..
+    if (this._currSourceID !== source.id) {
+      this._currSourceID = source.id;
+      this._metadata = {};
+    }
+
+    // Look for a loaded tile that covers the center of the map.
+    const center = context.systems.map.center();
+    const centerExtent = new Extent(center);
+    const layer = context.scene().layers.get('background');
+    const tileMap = layer?._tileMaps.get(source.id);
+    let tileCoord, tileZoom;
+
+    if (tileMap) {
+      for (const tile of tileMap.values()) {
+        if (!tile.loaded) continue;
+        if (tile.wgs84Extent.contains(centerExtent)) {
+          tileCoord = tile.xyz;
+          tileZoom = tile.xyz[2];
+          break;
+        }
+      }
+    }
+
+    // update zoom
+    const zoom = tileZoom || Math.floor(context.systems.map.zoom());
+    this._metadata.zoom = String(zoom);
+    selection.selectAll('.background-info-list-zoom')
+      .classed('hide', false)
+      .selectAll('.background-info-span-zoom')
+      .text(this._metadata.zoom);
+
+    if (!tileCoord) return;
+
+    // attempt async update of the rest of the fields..
+    source.getMetadata(center, tileCoord, (err, result) => {
+      if (err || this._currSourceID !== source.id) return;
+
+      // update vintage
+      const vintage = result.vintage;
+      this._metadata.vintage = (vintage &amp;&amp; vintage.range) || l10n.t('info_panels.background.unknown');
+      selection.selectAll('.background-info-list-vintage')
+        .classed('hide', false)
+        .selectAll('.background-info-span-vintage')
+        .text(this._metadata.vintage);
+
+      // update other metadata
+      METADATA_KEYS.forEach(k => {
+        if (k === 'zoom' || k === 'vintage') return;  // done already
+
+        const val = result[k];
+        this._metadata[k] = val;
+        selection.selectAll(`.background-info-list-${k}`)
+          .classed('hide', !val)
+          .selectAll(`.background-info-span-${k}`)
+          .text(val);
+      });
+    });
+  }
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5542,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

@@ -5302,61 +5302,469 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="KeyOperationBehavior.html">Class: KeyOperationBehavior</h1>
         
 
 
+
+<section>
+    
+<header>
+    <div class="header content-size">
+        <h2>KeyOperationBehavior
+        </h2>
+        
+            <div class="class-description"><p><code>KeyOperationBehavior</code> binds whatever keystroke events trigger an &quot;operation&quot;
+(&quot;operations&quot; are the things that go on the editing menu)</p></div>
+        
+    </div>
+</header>  
+
+<article class="content-size">
+    
+        <div class="container-overview">
+        
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="KeyOperationBehavior">
+            <a class="share-icon" href="#KeyOperationBehavior"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                new KeyOperationBehavior
+            </span>
+            <span class="signature">(`context`, `operation`)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="behaviors_KeyOperationBehavior.js.html#line8">KeyOperationBehavior.js:8</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
     
 
+    
+    
+    
+    
+    
+        
 
-    <h3> </h3>
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>`context`</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Global shared application context</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>`operation`</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The operation this behavior is associated with</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-
-
-
-
-
-
+    
+    
 
     
 
+    
+    
+    
+    
+    
+    
+    
+</dd>
 
+        
+        </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Classes</h3>
+        
+        <dl class="clearfix summary-list list-classes">
+            <dt class=""><a href="KeyOperationBehavior.html">KeyOperationBehavior</a></dt>
+            
+        </dl>
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl class="list-methods">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_keydown">
+            <a class="share-icon" href="#_keydown"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _keydown
+            </span>
+            <span class="signature">(`e`)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="behaviors_KeyOperationBehavior.js.html#line64">KeyOperationBehavior.js:64</a>
+        </div>
+        
+    </div>
 
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_keydown
+Handles the keydown event</p>
+    </div>
+    
 
-    <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
-    </section>
+    
+    
+    
+    
+    
+        
 
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>`e`</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A d3 keydown event</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="disable">
+            <a class="share-icon" href="#disable"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                disable
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="behaviors_KeyOperationBehavior.js.html#line48">KeyOperationBehavior.js:48</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>disable
+Unbind event handlers</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="enable">
+            <a class="share-icon" href="#enable"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                enable
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="behaviors_KeyOperationBehavior.js.html#line33">KeyOperationBehavior.js:33</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>enable
+Bind event handlers</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+
+    
+</article>
+
+</section>  
 
 
 

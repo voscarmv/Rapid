@@ -5302,59 +5302,384 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="core_Map3dSystem.js.html">Source: core/Map3dSystem.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>core/Map3dSystem.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { select as d3_select } from 'd3-selection';
+
+import { AbstractSystem } from './AbstractSystem';
+
+const MAPLIBRE_JS = 'https://cdn.jsdelivr.net/npm/maplibre-gl@3/dist/maplibre-gl.min.js';
+const MAPLIBRE_CSS = 'https://cdn.jsdelivr.net/npm/maplibre-gl@3/dist/maplibre-gl.min.css';
+const SELECTION_COLOR = '#01d4fa';
+
+
+/**
+ * `Map3dSystem` wraps an instance of MapLibre viewer
+ * and maintains the map state and style specification.
+ */
+export class Map3dSystem extends AbstractSystem {
+
+  /**
+   * @constructor
+   * @param  `context`   Global shared application context
+   */
+  constructor(context) {
+    super(context);
+    this.id = 'map3d';
+    this.autoStart = false;
+    this.dependencies = new Set(['map']);
+    this.containerID = '3d-buildings';
+    this.maplibre = null;
+
+    this._loadPromise = null;
+    this._startPromise = null;
+
+    this.building3dlayerSpec = this.get3dBuildingLayerSpec('3D Buildings', 'osmbuildings');
+    this.roadStrokelayerSpec = this.getRoadStrokeLayerSpec('Roads', 'osmroads');
+    this.roadCasinglayerSpec = this.getRoadCasingLayerSpec('Roads', 'osmroads');
+    this.roadSelectedlayerSpec = this.getRoadSelectedLayerSpec('Roads', 'osmroads');
+    this.areaLayerSpec = this.getAreaLayerSpec('Areas', 'osmareas');
+  }
+
+
+  /**
+   * initAsync
+   * Called after all core objects have been constructed.
+   * @return {Promise} Promise resolved when this component has completed initialization
+   */
+  initAsync() {
+    for (const id of this.dependencies) {
+      if (!this.context.systems[id]) {
+        return Promise.reject(`Cannot init:  ${this.id} requires ${id}`);
+      }
+    }
+    return Promise.resolve();
+  }
+
+
+  /**
+   * startAsync
+   * Called after all core objects have been initialized.
+   * @return {Promise} Promise resolved when this component has completed startup
+   */
+  startAsync() {
+    if (this._startPromise) return this._startPromise;
+
+    return this._startPromise = this._loadAssetsAsync()
+      .then(() => {
+        const maplibregl = window.maplibregl;
+        if (!maplibregl) throw new Error('maplibre-gl not loaded');
+
+        const map = this.context.systems.map;
+
+        const maplibre = this.maplibre = new maplibregl.Map({
+          container: this.containerID,
+          pitch: 30,
+          style: {
+            version: 8, sources: {}, layers: [
+              {
+                'id': 'Background',
+                'type': 'background',
+                'layout': {
+                  'visibility': 'visible'
+                },
+                'paint': {
+                  'background-color': 'white'
+                }
+              },
+          ]}
+        });
+
+        return new Promise(resolve => {
+          maplibre.on('load', () => {
+            maplibre.setLight({
+              anchor: 'viewport',
+              color: '#ff00ff',
+              position: [1, 200, 30],
+              intensity: 0.3,
+            });
+
+            maplibre.jumpTo({
+              zoom: map.zoom() - 3,
+              center: map.extent().center(),
+            });
+
+            // sources
+            maplibre.addSource('osmareas', {
+              type: 'geojson',
+              data: { type: 'FeatureCollection', features: [] },
+            });
+
+            maplibre.addSource('osmroads', {
+              type: 'geojson',
+              data: { type: 'FeatureCollection', features: [] },
+            });
+
+            maplibre.addSource('osmbuildings', {
+              type: 'geojson',
+              data: { type: 'FeatureCollection', features: [] },
+            });
+
+            // Layers need to be added in 'painter's algorithm' order, so the stuff on the bottom goes first!
+            maplibre.addLayer(this.areaLayerSpec);
+            maplibre.addLayer(this.roadSelectedlayerSpec);
+            maplibre.addLayer(this.roadCasinglayerSpec);
+            maplibre.addLayer(this.roadStrokelayerSpec);
+            maplibre.addLayer(this.building3dlayerSpec);
+
+            this._started = true;
+            resolve();
+          });
+        });
+      })
+      .catch(err => {
+        if (err instanceof Error) console.error(err);   // eslint-disable-line no-console
+        this._startPromise = null;
+      });
+  }
+
+
+  /**
+   * _loadAssetsAsync
+   * Load the MapLibre JS and CSS files into the document head
+   * @return {Promise} Promise resolved when both files have been loaded
+   */
+  _loadAssetsAsync() {
+    if (this._loadPromise) return this._loadPromise;
+
+    return this._loadPromise = new Promise((resolve, reject) => {
+      let count = 0;
+      const loaded = () => {
+        if (++count === 2) resolve();
+      };
+
+      const head = d3_select('head');
+
+      head.selectAll('#rapideditor-maplibre-css')
+        .data([0])
+        .enter()
+        .append('link')
+        .attr('id', 'rapideditor-maplibre-css')
+        .attr('rel', 'stylesheet')
+        .attr('crossorigin', 'anonymous')
+        .attr('href', MAPLIBRE_CSS)
+        .on('load', loaded)
+        .on('error', reject);
+
+      head.selectAll('#rapideditor-maplibre-js')
+        .data([0])
+        .enter()
+        .append('script')
+        .attr('id', 'rapideditor-maplibre-js')
+        .attr('crossorigin', 'anonymous')
+        .attr('src', MAPLIBRE_JS)
+        .on('load', loaded)
+        .on('error', reject);
+    });
+  }
+
+
+  /**
+   * resetAsync
+   * Called after completing an edit session to reset any internal state
+   * @return {Promise} Promise resolved when this component has completed resetting
+   */
+  resetAsync() {
+    return Promise.resolve();
+  }
+
+
+  /**
+   * get3dBuildingLayerSpec
+   * Returns a maplibre layer style specification that appropriately styles 3D buildings
+   * using data-driven styling for selected features. Features with no height data are drawn as flat
+   * polygons.
+   * @param {string} id the id of the layer that the source data shall be applied to
+   * @param {string} source the source geojson data that to be rendered
+   * @returns
+   */
+  get3dBuildingLayerSpec(id, source) {
+    return {
+      id: id,
+      type: 'fill-extrusion',
+      source: source,
+      layout: {},
+      paint: {
+        'fill-extrusion-color': [
+          'match',
+          ['get', 'selected'],
+          'true',
+          SELECTION_COLOR,
+          /* Regular building 'red' color */ '#e06e5f',
+        ],
+        'fill-extrusion-height': ['get', 'height'],
+        'fill-extrusion-base': ['get', 'min_height'],
+        'fill-extrusion-opacity': 0.85,
+      },
+    };
+  }
+
+  /**
+   * get3dBuildingLayerSpec
+   * Returns a maplibre layer style specification that appropriately styles 3D buildings
+   * using data-driven styling for selected features. Features with no height data are drawn as flat
+   * polygons.
+   * @param {string} id the id of the layer that the source data shall be applied to
+   * @param {string} source the source geojson data that to be rendered
+   * @returns
+   */
+  getAreaLayerSpec(id, source) {
+    return {
+      id: id,
+      type: 'fill',
+      source: source,
+      layout: {},
+      paint: {
+        'fill-color': ['get', 'fillcolor'],
+        'fill-outline-color': ['get', 'strokecolor'],
+        'fill-opacity': 0.5
+      },
+    };
+  }
+
+  /**
+   * getRoadCasingLayerSpec
+   * Returns a maplibre layer style specification that widens the road casing to be just above the stroke.
+   * @param {string} id the id of the layer that the source data shall be applied to
+   * @param {string} source the source geojson data that to be rendered
+   * @returns the specification object with mapbox styling rules for the 'highway' tag data.
+   */
+  getRoadCasingLayerSpec(id, source) {
+    return {
+      id: id + '-casing',
+      type: 'line',
+      source: source,
+      minzoom: 4,
+      layout: {
+        'line-cap': 'butt',
+        'line-join': 'round',
+        visibility: 'visible',
+      },
+      paint: {
+        'line-color': ['get', 'casingColor'],
+        'line-width': this.getLineWidthSpecification(6),
+      },
+    };
+  }
+
+  /**
+   * getRoadSelectedLayerSpec
+   * Returns a maplibre layer style specification that appropriately styles a wide extra casing around any selected roads.
+   * Also uses the same 'selected' color as the building layer.
+   * @param {string} id the id of the layer that the source data shall be applied to
+   * @param {string} source the source geojson data that to be rendered
+   * @returns
+   */
+  getRoadSelectedLayerSpec(id, source) {
+    return {
+      id: id + '-selected',
+      type: 'line',
+      source: source,
+      minzoom: 4,
+      layout: {
+        'line-cap': 'butt',
+        'line-join': 'round',
+        visibility: 'visible',
+      },
+      paint: {
+        'line-color': SELECTION_COLOR,
+        'line-opacity': ['match', ['get', 'selected'], 'true', 0.75, 0],
+        'line-width': this.getLineWidthSpecification(12),
+      },
+    };
+  }
+
+  /**
+   * getRoadStrokeLayerSpec
+   * Returns a maplibre layer style specification that appropriately styles the road stroke to be just thinner than the casing.
+   * Also uses the same stroke color as the main OSM styling.
+   * @param {string} id the id of the layer that the source data shall be applied to
+   * @param {string} source the source geojson data that to be rendered
+   * @returns
+   * @returns
+   */
+  getRoadStrokeLayerSpec(id, source) {
+    return {
+      id: id + '-stroke',
+      type: 'line',
+      source: source,
+      minzoom: 4,
+      layout: {
+        'line-cap': 'butt',
+        'line-join': 'round',
+        visibility: 'visible',
+      },
+      paint: {
+        'line-color': ['get', 'strokeColor'],
+        'line-opacity': [
+          'match',
+          ['get', 'highway'],
+          'unclassified',
+          0.8,
+          'service',
+          0.2,
+          1,
+        ],
+        'line-width': this.getLineWidthSpecification(4),
+      },
+    };
+  }
+
+  getLineWidthSpecification(baseWidth) {
+    return [
+      'interpolate',
+      ['linear', 2],
+      ['zoom'],
+      5,
+      0.5,
+      16,
+      [
+        'match',
+        ['get', 'highway'],
+        ['motorway', 'trunk', 'primary'],
+        baseWidth * 2,
+        ['secondary', 'unclassified'],
+        Math.floor(0.75 * baseWidth * 2),
+        ['tertiary'],
+        Math.floor(0.75 * baseWidth * 2) - 1,
+        ['minor', 'service', 'track', 'footway', 'pedestrian', 'cycleway'],
+        baseWidth,
+        baseWidth,
+      ],
+      20,
+      [
+        'match',
+        ['get', 'highway'],
+        ['motorway', 'trunk', 'primary'],
+        baseWidth * 2.5,
+        ['secondary', 'unclassified'],
+        baseWidth * 2.5,
+        ['tertiary'],
+        baseWidth * 2.5,
+        ['minor', 'service', 'track', 'footway', 'pedestrian', 'cycleway'],
+        baseWidth * 2,
+        baseWidth * 2,
+      ],
+    ];
+  }
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5691,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

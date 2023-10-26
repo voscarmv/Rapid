@@ -5302,61 +5302,1625 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="AbstractFeature.html">Class: AbstractFeature</h1>
         
 
 
+
+<section>
+    
+<header>
+    <div class="header content-size">
+        <h2>AbstractFeature
+        </h2>
+        
+            <div class="class-description"><p>AbstractFeature is the base class from which all Features inherit.
+It contains properties that used to manage the Feature in the scene graph</p>
+<p>Properties you can access:
+<code>id</code>                Unique string to use for the name of this Feature
+<code>type</code>              String describing what kind of Feature this is ('point', 'line', 'polygon')
+<code>container</code>         PIXI.Container() that contains all the graphics needed to draw the Feature
+<code>parentContainer</code>   PIXI.Container() for the parent - this Feature's container will be added to it.
+<code>geometry</code>          PixiGeometry() class containing all the information about the geometry
+<code>style</code>             Object containing style info
+<code>label</code>             String containing the Feature's label (if any)
+<code>data</code>              Data bound to this Feature (like <code>__data__</code> from the D3.js days)
+<code>dataID</code>            Data bound to this Feature (like <code>__data__</code> from the D3.js days)
+<code>visible</code>           <code>true</code> if the Feature is visible (<code>false</code> if it is culled)
+<code>allowInteraction</code>  <code>true</code> if the Feature is allowed to be interactive (emits Pixi events)
+<code>active</code>            <code>true</code> if the Feature is currently being interacted with (dragged, etc)
+<code>dirty</code>             <code>true</code> if the Feature needs to be rebuilt
+<code>selected</code>          <code>true</code> if the Feature is selected
+<code>highlighted</code>       <code>true</code> if the Feature is highlighted
+<code>hovered</code>           <code>true</code> if the Feature is hovered
+<code>v</code>                 Version of the Feature, can be used to detect changes
+<code>lod</code>               Level of detail for the Feature last time it was styled (0 = off, 1 = simplified, 2 = full)
+<code>halo</code>              A PIXI.DisplayObject() that contains the graphics for the Feature's halo (if it has one)
+<code>sceneBounds</code>       PIXI.Rectangle() where 0,0 is the origin of the scene</p></div>
+        
+    </div>
+</header>  
+
+<article class="content-size">
+    
+        <div class="container-overview">
+        
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="AbstractFeature">
+            <a class="share-icon" href="#AbstractFeature"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                new AbstractFeature
+            </span>
+            <span class="signature">(layer, featureID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line31">AbstractFeature.js:31</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
     
 
+    
+    
+    
+    
+    
+        
 
-    <h3> </h3>
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>layer</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The Layer that owns this Feature</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>featureID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Unique string to use for the name of this Feature</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-
-
-
-
-
-
+    
+    
 
     
 
+    
+    
+    
+    
+    
+    
+    
+</dd>
 
+        
+        </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Classes</h3>
+        
+        <dl class="clearfix summary-list list-classes">
+            <dt class=""><a href="AbstractFeature.html">AbstractFeature</a></dt>
+            
+        </dl>
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl class="list-members">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="active">
+            <a class="share-icon" href="#active"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">active</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>isInteractive
+Whether the Feature is currently being interacted with</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
+    
+    
+</dd>
 
-    <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
-    </section>
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="allowInteraction">
+            <a class="share-icon" href="#allowInteraction"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">allowInteraction</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>allowInteraction
+Whether the Feature is allowed to be interactive</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="data">
+            <a class="share-icon" href="#data"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">data</span>
+            
+            
+            <span class="access-signature">readonly</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>data
+Getter only, use <code>setData()</code> to change it.
+(because we need to know an id/key to identify the data by, and these can be anything)</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="dataID">
+            <a class="share-icon" href="#dataID"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">dataID</span>
+            
+            
+            <span class="access-signature">readonly</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>dataID
+Getter only, use <code>setData()</code> to change it.
+(because we need to know an id/key to identify the data by, and these can be anything)</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="dirty">
+            <a class="share-icon" href="#dirty"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">dirty</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>dirty
+Whether the Feature needs to be rebuilt</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="drawing">
+            <a class="share-icon" href="#drawing"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">drawing</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>drawing</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="highlighted">
+            <a class="share-icon" href="#highlighted"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">highlighted</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>highlighted</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="hovered">
+            <a class="share-icon" href="#hovered"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">hovered</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>hovered</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="id">
+            <a class="share-icon" href="#id"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">id</span>
+            
+            
+            <span class="access-signature">readonly</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Feature id</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="label">
+            <a class="share-icon" href="#label"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">label</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>label</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="parentContainer">
+            <a class="share-icon" href="#parentContainer"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">parentContainer</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>parentContainer</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="selected">
+            <a class="share-icon" href="#selected"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">selected</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>selected</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="style">
+            <a class="share-icon" href="#style"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">style</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>style</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="visible">
+            <a class="share-icon" href="#visible"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">visible</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>visible
+Whether the Feature is currently visible</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl class="list-methods">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addChildData">
+            <a class="share-icon" href="#addChildData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                addChildData
+            </span>
+            <span class="signature">(parentID, childID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line369">AbstractFeature.js:369</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>addChildData
+Adds a mapping from parent data to child data.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>parentID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID of the parent (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>childID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID of the child (e.g. 'w123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="clearChildData">
+            <a class="share-icon" href="#clearChildData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                clearChildData
+            </span>
+            <span class="signature">(parentID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line379">AbstractFeature.js:379</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>clearChildData
+Removes all child dataIDs for the given parent dataID</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>parentID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> dataID of the parent (e.g. 'r123')</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="destroy">
+            <a class="share-icon" href="#destroy"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                destroy
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line91">AbstractFeature.js:91</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>destroy
+Every Feature should have a destroy function that frees all the resources
+Do not use the Feature after calling <code>destroy()</code>.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="setData">
+            <a class="share-icon" href="#setData"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                setData
+            </span>
+            <span class="signature">(dataID, data)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line356">AbstractFeature.js:356</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>setData
+This binds the data element to the feature, also lets the layer know about it.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>dataID</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>String</code> identifer for this data element (e.g. 'n123')</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p><code>Object</code> data to bind to the feature (e.g. an OSM Node)</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="update">
+            <a class="share-icon" href="#update"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                update
+            </span>
+            <span class="signature">(projection, zoom)</span>
+            
+            <span class="access-signature">abstract</span>
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line133">AbstractFeature.js:133</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>update
+Every Feature should have an <code>update()</code> function that redraws the Feature at the given projection and zoom.
+When the Feature is updated, its <code>dirty</code> flags should be set to <code>false</code>.
+Override in a subclass with needed logic. It will be passed:</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>projection</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Pixi projection to use for rendering</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>zoom</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Effective zoom to use for rendering</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="updateHalo">
+            <a class="share-icon" href="#updateHalo"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                updateHalo
+            </span>
+            <span class="signature">()</span>
+            
+            <span class="access-signature">abstract</span>
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="pixi_AbstractFeature.js.html#line148">AbstractFeature.js:148</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>updateHalo
+Every Feature should have an <code>updateHalo()</code> function that redraws any hover or select styling.
+Override in a subclass with needed logic.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+
+    
+</article>
+
+</section>  
 
 
 

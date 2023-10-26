@@ -10,6 +10,14 @@ We actively welcome your pull requests.
 5. Make sure your code lints.
 6. If you haven't already, complete the Contributor License Agreement ("CLA").
 
+### Forking, cloning and running Rapid
+
+### How to add tests
+
+### Updating API documentation
+
+### Linting
+
 ## Contributor License Agreement ("CLA")
 In order to accept your pull request, we need you to submit a CLA. You only need
 to do this once to work on any of Facebook's open source projects.

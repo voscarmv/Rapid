@@ -5302,61 +5302,4758 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="EditSystem.html">Class: EditSystem</h1>
         
 
 
+
+<section>
+    
+<header>
+    <div class="header content-size">
+        <h2>EditSystem
+        </h2>
+        
+            <div class="class-description"><p><code>EditSystem</code> maintains the history of user edits.
+(This used to be called 'history', but that word means something else in browsers)</p>
+<p>This system maintains a Base Graph, a stack of Edit history, and a <code>staging</code> Edit.</p>
+<p>The Base Graph contains the base map state - all map entities that have been loaded
+and what they look like before any edits have occurred.
+As more map is loaded, more map features get merged into the Base Graph.</p>
+<p>Each entry in the history stack is an <code>Edit</code>.  An Edit may contain:</p>
+<ul>
+<li><code>annotation</code>  - undo/redo annotation, a String saying what the Edit did. e.g. &quot;Started a Line&quot;.</li>
+<li><code>graph</code>       - Graph at the time of the Edit</li>
+<li><code>selectedIDs</code> - ids that the user had selected at the time (assumed to be OSM)</li>
+<li><code>sources</code>     - sources being used to make the Edit (imagery, photos, data)</li>
+<li><code>transform</code>   - map transform at the time of the Edit</li>
+</ul>
+<p>Special named Edits:</p>
+<ul>
+<li><code>base</code> - The initial Edit, <code>history[0]</code>.
+The <code>base</code> Edit contains the Base Graph and nothing else.</li>
+<li><code>stable</code> - The latest accepted Edit, <code>history[index]</code>.
+The <code>stable</code> Edit is suitable for validation, backups, saving.</li>
+<li><code>staging</code> - A work-in-progress Edit, not yet added to the history.
+The <code>staging</code> Edit is used throughout the application to determine the current map state.</li>
+</ul>
+<p>The history might look like this:</p>
+<p><code>base</code>           …undo    <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN
+<code>staging</code> (WIP after <code>stable</code>)</p>
+<p>Code elsewhere in the application can use these methods to make edits and manipulate the history:</p>
+<ul>
+<li><code>perform(action)</code> - This performs a bit of work.  Perform accepts a varible number of
+&quot;action&quot; arguments. Actions are functions that accept a Graph and return a modified Graph.
+All work is performed against the <code>staging</code> edit.</li>
+<li><code>revert()</code> - This reverts all work in progress by replacing <code>staging</code> with a fresh copy of <code>stable</code>.</li>
+<li><code>commit(options)</code> - This accepts the <code>staging</code> work-in-progress edit by adding
+it to the end of the history (removing any forward redo history, if any)
+Commit accepts an <code>annotation</code> (e.g. &quot;Started a line&quot;) to say what the edit does.</li>
+<li><code>commitAppend(options)</code> - This is just like <code>commit</code> but instead of
+adding <code>staging</code> after <code>stable</code>, <code>staging</code> replaces <code>stable</code>.</li>
+<li><code>undo()</code> - Move the <code>stable</code> index back to the previous Edit (or <code>_index = 0</code>).</li>
+<li><code>redo()</code> - Move the <code>stable</code> index forward to the next Edit (if any)</li>
+<li><code>setCheckpoint(checkpointID)</code> - Save <code>history</code> and <code>index</code> as a checkpoint to return to later.</li>
+<li><code>restoreCheckpoint(checkpointID)</code> - Restore <code>history</code> and <code>index</code> identified by checkpointID.</li>
+</ul>
+<p>Code can also wrap calls in a &quot;transaction&quot;, which will prevent change events from being emitted.</p>
+<ul>
+<li><code>beginTransaction()</code> - Prevents <code>stagingchange</code> and <code>stablechange</code> events from being emitted.</li>
+<li><code>endTransaction()</code> - Marks transaction as complete.  Any <code>stagingchange</code> and <code>stablechange</code>
+events will be emitted that cover the difference from the beginning -&gt; end of the transaction.</li>
+</ul>
+<p>Events available:
+'stagingchange' - Fires on every edit performed (i.e. when <code>staging</code> changes),
+Receives Difference between old <code>staging</code> Graph and new <code>staging</code> Graph.
+'stablechange' - Fires only when the history actually changes (i.e. when <code>stable</code> changes)
+Receives Difference between old <code>stable</code> Graph and new <code>stable</code> Graph.
+'historyjump' - Fires on undo/redo/restore.  This is for situations when we may need to
+jump the user to a different part of the map and restore a different selection.
+'merge'  - Fires when new base entities are merged into the base graph
+'storage_error'</p></div>
+        
+    </div>
+</header>  
+
+<article class="content-size">
+    
+        <div class="container-overview">
+        
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="EditSystem">
+            <a class="share-icon" href="#EditSystem"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                new EditSystem
+            </span>
+            <span class="signature">(`context`)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line76">EditSystem.js:76</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>`context`</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Global shared application context</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+        </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Classes</h3>
+        
+        <dl class="clearfix summary-list list-classes">
+            <dt class=""><a href="EditSystem.html">EditSystem</a></dt>
+            
+        </dl>
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl class="list-members">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="base">
+            <a class="share-icon" href="#base"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">base</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>base
+The <code>base</code> edit is the initial edit in the history.  It contains the Base Graph.
+It will not contain any actual user edits, sources, annotation.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="canRestoreBackup">
+            <a class="share-icon" href="#canRestoreBackup"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">canRestoreBackup</span>
+            
+            
+            <span class="access-signature">readonly</span>
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>canRestoreBackup
+This flag will be <code>true</code> if <code>initAsync</code> has determined that there is a restorable
+backup, and we are waiting on the user to make a decision about what to do with it.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="hasWorkInProgress">
+            <a class="share-icon" href="#hasWorkInProgress"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">hasWorkInProgress</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>hasWorkInProgress
+Is there work in progress in the <code>staging</code> edit?</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="history">
+            <a class="share-icon" href="#history"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">history</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>history
+A shallow copy of the history.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="index">
+            <a class="share-icon" href="#index"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">index</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>index
+Index pointing to the current <code>stable</code> Edit</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="stable">
+            <a class="share-icon" href="#stable"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">stable</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>stable
+The <code>stable</code> edit is the latest accepted edit in the history, as indicated by <code>_index</code>.
+The <code>stable</code> edit is suitable for validation or backups.
+Before the user edits anything, <code>_index === 0</code>, so the <code>stable === base</code>.
+Note that &quot;future&quot; redo history can continue past the <code>stable</code> edit, if the user has undone.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="staging">
+            <a class="share-icon" href="#staging"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">staging</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>staging
+The <code>staging</code> edit will be a placeholder work-in-progress edit in the chain immediately
+following the <code>stable</code> edit.  The user may be drawing a feature or editing tags.
+The <code>staging</code> edit has not been added to the history yet.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="tree">
+            <a class="share-icon" href="#tree"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">tree</span>
+            
+            
+            
+            
+            
+        </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>tree
+The tree is a spatial index that keeps itself in sync with the <code>staging</code> graph.</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl class="list-methods">
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_backupKey">
+            <a class="share-icon" href="#_backupKey"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _backupKey
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1223">EditSystem.js:1223</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_backupKey
+Generate a key used to store/retrieve backup edits.
+It uses <code>window.location.origin</code> avoid conflicts with other instances of Rapid.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_gatherSources">
+            <a class="share-icon" href="#_gatherSources"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _gatherSources
+            </span>
+            <span class="signature">(annotation)</span><span class="type-signature">Object</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1234">EditSystem.js:1234</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_gatherSources
+Get the sources used to make the <code>staging</code> edit.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>annotation</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
     
 
 
-    <h3> </h3>
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Object
+                        
+                    
+            </td>
+            <td class="description last">sources Object containing <code>imagery</code>, <code>photos</code>, <code>data</code> properties</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_perform">
+            <a class="share-icon" href="#_perform"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _perform
+            </span>
+            <span class="signature">(Array, Eased)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1267">EditSystem.js:1267</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_perform
+Internal <code>_perform</code>, accepts both Actions array and eased time,
+Performs the edits and emits no events.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>Array</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
 
 
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>of Action functions to perform</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>Eased</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
 
 
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        <span class="nullable">nullable</span>
+                    
+                        
+                    
+                
+                <p>time, should be in the range [0..1]</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_replaceStaging">
+            <a class="share-icon" href="#_replaceStaging"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _replaceStaging
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1285">EditSystem.js:1285</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_replaceStaging
+This replaces the <code>staging</code> work-in-progress edit with a fresh copy of <code>stable</code>.
+Rolls back the edits and emits no events.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="_updateChanges">
+            <a class="share-icon" href="#_updateChanges"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                _updateChanges
+            </span>
+            <span class="signature">()</span><span class="type-signature"><a href="Difference.html">Difference</a></span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1296">EditSystem.js:1296</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>_updateChanges
+Recalculate the differences and emit <code>stablechange</code> and <code>stagingchange</code> events.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
 
 
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Difference.html">Difference</a>
+                        
+                    
+            </td>
+            <td class="description last">Difference between before and after of <code>staging</code> Edit</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="beginTransaction">
+            <a class="share-icon" href="#beginTransaction"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                beginTransaction
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line660">EditSystem.js:660</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>beginTransaction
+Prevents <code>stagingchange</code> and <code>stablechange</code> events from being emitted.
+During a transaction, edits can be performed but no <code>change</code> events will be emitted.
+This is to prevent other parts of the code from rendering/validating partial or incomplete edits.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="changes">
+            <a class="share-icon" href="#changes"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                changes
+            </span>
+            <span class="signature">(action)</span><span class="type-signature">Object</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line735">EditSystem.js:735</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>changes
+This returns a summery of all changes made from <code>base</code> -&gt; <code>stable</code>
+Optionally includes a given action function to apply to the <code>stable</code> graph.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>action</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
 
 
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        <span class="nullable">nullable</span>
+                    
+                        
+                    
+                
+                <p>Optional action to apply to the <code>stable</code> graph</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Object
+                        
+                    
+            </td>
+            <td class="description last">Object containing <code>modified</code>, <code>created</code>, <code>deleted</code> summary of changes</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="clearBackup">
+            <a class="share-icon" href="#clearBackup"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                clearBackup
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1202">EditSystem.js:1202</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>clearBackup
+Remove any backup stored in localStorage.
+This happens when:</p>
+<ul>
+<li>The user chooses to &quot;Discard my changes&quot; from the restore screen</li>
+<li>The user switches sources with the source switcher</li>
+<li>A changeset is inflight, we remove it to prevent the user from restoring duplicate edits</li>
+</ul>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="commit">
+            <a class="share-icon" href="#commit"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                commit
+            </span>
+            <span class="signature">(options)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line393">EditSystem.js:393</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>commit
+This finalizes the <code>staging</code> work-in-progress edit.
+(It's somewhat like what <code>git commit</code> does.)</p>
+<ul>
+<li>Set annotation, sources, and other edit metadata properties</li>
+<li>Add the <code>staging</code> edit to the end of the history (at this point <code>staging</code> becomes <code>stable</code>)</li>
+<li>Finally, create a new empty <code>staging</code> work-in-progress Edit</li>
+</ul>
+<p>Before calling <code>commit()</code>:</p>
+<p><code>base</code>           …undo    <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN0
+<code>staging</code> (WIP after Edit2)
+After calling <code>commit()</code>:</p>
+<p><code>base</code>                     …undo    <code>stable</code>
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; EditN0 ]
+<br>
+--&gt;  EditN1
+<code>staging</code> (WIP after EditN0)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        <span class="nullable">nullable</span>
+                    
+                        
+                    
+                
+                <p>Optional <code>Object</code> of options passed</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>annotation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A String saying what the Edit did. e.g. &quot;Started a Line&quot;.
+Note that Rapid edits pass an Object as the annotation including more info about the edit.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>selectedIDs</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Array of selectedIDs</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="commitAppend">
+            <a class="share-icon" href="#commitAppend"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                commitAppend
+            </span>
+            <span class="signature">(options)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line447">EditSystem.js:447</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>commitAppend
+This is like <code>commit</code>, but instead of adding <code>staging</code> after stable,
+it replaces <code>stable</code> with <code>staging</code> and does not advance the history.
+(It's somewhat like what <code>git commit --append</code> does.)</p>
+<ul>
+<li>Set annotation, sources, and other edit metadata properties</li>
+<li>Replace the <code>stable</code> edit with the <code>staging</code> edit (at this point <code>staging</code> becomes <code>stable</code>)</li>
+<li>Finally, create a new empty <code>staging</code> work-in-progress Edit</li>
+</ul>
+<p>Note:  You can't do this if there are no edits yet - it will throw if you try to append to the <code>base</code> edit.</p>
+<p>Before calling <code>commitAppend()</code>:</p>
+<p><code>base</code>           …undo    <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN0
+<code>staging</code> (WIP after Edit2)
+After calling <code>commitAppend()</code>:</p>
+<p><code>base</code>           …undo    <code>stable</code>
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; EditN0 ]
+<br>
+--&gt;  EditN1
+<code>staging</code> (WIP after EditN0)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        <span class="nullable">nullable</span>
+                    
+                        
+                    
+                
+                <p>Optional <code>Object</code> of options passed</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>annotation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A String saying what the Edit did. e.g. &quot;Started a Line&quot;.
+Note that Rapid edits pass an Object as the annotation including more info about the edit.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>selectedIDs</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Array of selectedIDs</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        <p>Will throw if you try to append to the <code>base</code> edit</p>
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="deleteCheckpoint">
+            <a class="share-icon" href="#deleteCheckpoint"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                deleteCheckpoint
+            </span>
+            <span class="signature">(checkpointID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line596">EditSystem.js:596</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>deleteCheckpoint
+This removes the checkpoint identified by the given checkpointID.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkpointID</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A string to identify the checkpoint</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="difference">
+            <a class="share-icon" href="#difference"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                difference
+            </span>
+            <span class="signature">()</span><span class="type-signature"><a href="Difference.html">Difference</a></span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line723">EditSystem.js:723</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>difference
+Returns a <code>Difference</code> containing all edits from <code>base</code> -&gt; <code>stable</code>
+We use this pretty frequently, so it's cached in <code>this._fullDifference</code>
+and recomputed by the <code>_updateChanges</code> function only when <code>stable</code> changes.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Difference.html">Difference</a>
+                        
+                    
+            </td>
+            <td class="description last">The total changes made by the user during their edit session</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="endTransaction">
+            <a class="share-icon" href="#endTransaction"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                endTransaction
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line671">EditSystem.js:671</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>endTransaction
+This marks the transaction as complete, and allows events to be emitted again.
+Any <code>stagingchange</code> and <code>stablechange</code> events will be emitted that cover
+the difference from the beginning -&gt; end of the transaction.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="fromJSON">
+            <a class="share-icon" href="#fromJSON"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                fromJSON
+            </span>
+            <span class="signature">(json, loadMissing)</span><span class="type-signature">string</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line993">EditSystem.js:993</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>fromJSON
+Restore the edit history from a JSON string.
+Optionally fetch missing child nodes from OSM
+(bhousel - not clear to me under what circumstances we would have a <code>false</code> here? Test environment?)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>json</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Stringified JSON to parse</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>loadMissing</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>if <code>true</code> also attempt to fetch missing child nodes from OSM API</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        string
+                        
+                    
+            </td>
+            <td class="description last">A String containing the JSON, or <code>undefined</code> if nothing to save</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getRedoAnnotation">
+            <a class="share-icon" href="#getRedoAnnotation"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                getRedoAnnotation
+            </span>
+            <span class="signature">()</span><span class="type-signature">string</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line695">EditSystem.js:695</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>getRedoAnnotation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        string
+                        
+                    
+            </td>
+            <td class="description last">The next redo annotation, or <code>undefined</code> if none</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getUndoAnnotation">
+            <a class="share-icon" href="#getUndoAnnotation"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                getUndoAnnotation
+            </span>
+            <span class="signature">()</span><span class="type-signature">string</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line681">EditSystem.js:681</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>getUndoAnnotation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        string
+                        
+                    
+            </td>
+            <td class="description last">The previous undo annotation, or <code>undefined</code> if none</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="hasChanges">
+            <a class="share-icon" href="#hasChanges"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                hasChanges
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line758">EditSystem.js:758</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>hasChanges
+This counts meangful edits only (modified, created, deleted).
+For example, we could perform a bunch of no-op edits and it would still return false.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
     
 
 
 
+<code>true</code> if the user has made any meaningful edits
 
-    <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
-    </section>
 
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="initAsync">
+            <a class="share-icon" href="#initAsync"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                initAsync
+            </span>
+            <span class="signature">()</span><span class="type-signature">Promise</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line117">EditSystem.js:117</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>initAsync
+Called after all core objects have been constructed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Promise
+                        
+                    
+            </td>
+            <td class="description last">Promise resolved when this component has completed initialization</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="intersects">
+            <a class="share-icon" href="#intersects"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                intersects
+            </span>
+            <span class="signature">()</span><span class="type-signature">Array</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line711">EditSystem.js:711</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>intersects
+Returns the entities from the <code>staging</code> graph with bounding boxes overlapping the given <code>extent</code>.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Array
+                        
+                    
+            </td>
+            <td class="description last">Entities intersecting the given Extent</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="merge">
+            <a class="share-icon" href="#merge"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                merge
+            </span>
+            <span class="signature">(entities, seenIDs?)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line614">EditSystem.js:614</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>merge
+Merge new entities into the Base Graph.
+This function is called when we have parsed a new tile of OSM data, we will
+receive the new entities and a list of all entity ids that the tile contains.
+Can also be called in other situations, like restoring history from
+storage, or loading specific entities from the OSM API.
+(Sorry, but this one is not like what <code>git merge</code> does.)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>entities</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Entities to merge into the history (usually only the new ones)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>seenIDs?</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Set</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>Optional set of all entity IDs on the tile (including previously seen ones)</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="perform">
+            <a class="share-icon" href="#perform"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                perform
+            </span>
+            <span class="signature">(args)</span><span class="type-signature"><a href="Difference.html">Difference</a></span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line286">EditSystem.js:286</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>perform
+This performs a bit of work.  Perform accepts a variable number of &quot;action&quot; arguments.
+&quot;Actions&quot; are functions that accept a Graph and return a modified Graph.
+All work is performed against the <code>staging</code> work-in-progress edit.
+If multiple functions are passed, they will be performed in order,
+and an <code>stagingchange</code> event will be emitted after they have all completed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                        <span class="repeatable">repeatable</span>
+                    
+                
+                <p>Variable number of Action functions to peform</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Difference.html">Difference</a>
+                        
+                    
+            </td>
+            <td class="description last">Difference between before and after of <code>staging</code> Edit</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="performAsync">
+            <a class="share-icon" href="#performAsync"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                performAsync
+            </span>
+            <span class="signature">(action)</span><span class="type-signature">Promise</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line305">EditSystem.js:305</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>performAsync
+Promisified version of <code>perform</code> that can support eased edits in a transition.
+This version of <code>perform</code> accepts a single Action function argument.
+If the Action is marked as being &quot;transitionable&quot;, run it multiple times with
+eased time parameter from 0..1 to create a smooth transition effect.
+If the Action is not marked as being &quot;transitionable&quot; just run it one time
+with <code>time = 1</code> and return a resolved promise.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>action</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>single Action function to perform</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Promise
+                        
+                    
+            </td>
+            <td class="description last">Promise fulfilled when the transition is completed</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="redo">
+            <a class="share-icon" href="#redo"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                redo
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line535">EditSystem.js:535</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>redo
+Move the <code>stable</code> index forward to the next Edit (if any)
+Note that all work-in-progress in the <code>staging</code> Edit is lost when calling <code>redo()</code>.</p>
+<p>Before calling <code>redo()</code>:</p>
+<p><code>base</code>           …undo    <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN0
+<code>staging</code> (WIP after Edit2)
+After calling <code>redo()</code>:</p>
+<p><code>base</code>                     …undo    <code>stable</code>
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN1
+<code>staging</code> (WIP after Edit3)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="reset">
+            <a class="share-icon" href="#reset"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                reset
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line178">EditSystem.js:178</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>reset
+Called after completing an edit session to reset any internal state</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="resetAsync">
+            <a class="share-icon" href="#resetAsync"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                resetAsync
+            </span>
+            <span class="signature">()</span><span class="type-signature">Promise</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line168">EditSystem.js:168</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>resetAsync
+Called after completing an edit session to reset any internal state</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Promise
+                        
+                    
+            </td>
+            <td class="description last">Promise resolved when this component has completed resetting</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="restoreBackup">
+            <a class="share-icon" href="#restoreBackup"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                restoreBackup
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1181">EditSystem.js:1181</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>restoreBackup
+Restore the user's backup from localStorage.
+This happens when:</p>
+<ul>
+<li>The user chooses to &quot;Restore my changes&quot; from the restore screen</li>
+</ul>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="restoreCheckpoint">
+            <a class="share-icon" href="#restoreCheckpoint"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                restoreCheckpoint
+            </span>
+            <span class="signature">(checkpointID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line575">EditSystem.js:575</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>restoreCheckpoint
+This returns the <code>history</code> and <code>index</code> back to the edit identified by the given checkpointID.
+Note that all work-in-progress in the <code>staging</code> Edit is lost when calling <code>restoreCheckpoint()</code>.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkpointID</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A string to identify the checkpoint</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="revert">
+            <a class="share-icon" href="#revert"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                revert
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line356">EditSystem.js:356</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>revert
+This reverts the <code>staging</code> work-in-progress by replacing <code>staging</code> with a fresh copy of <code>stable</code>.
+(It's more like what <code>git reset --hard</code> does, but we can't call it &quot;reset&quot;)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="saveBackup">
+            <a class="share-icon" href="#saveBackup"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                saveBackup
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line1141">EditSystem.js:1141</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>saveBackup
+Backup the user's edits to a JSON string in localStorage.
+This code runs occasionally as the user edits.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+
+<code>true</code> if a backup was saved
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="setCheckpoint">
+            <a class="share-icon" href="#setCheckpoint"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                setCheckpoint
+            </span>
+            <span class="signature">(checkpointID)</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line557">EditSystem.js:557</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>setCheckpoint
+This saves the <code>history</code> and <code>index</code> as a &quot;checkpoint&quot; that we can return to later.
+If the given checkpointID exists, it will be overwritten.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkpointID</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A string to identify the checkpoint</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="sourcesUsed">
+            <a class="share-icon" href="#sourcesUsed"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                sourcesUsed
+            </span>
+            <span class="signature">()</span><span class="type-signature">Object</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line769">EditSystem.js:769</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>sourcesUsed
+This prepares the list of all sources used during the user's editing session.
+This is called by <code>commit.js</code> when preparing the changeset before uploading.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Object
+                        
+                    
+            </td>
+            <td class="description last">Object of all sources used during the user's editing session</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="startAsync">
+            <a class="share-icon" href="#startAsync"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                startAsync
+            </span>
+            <span class="signature">()</span><span class="type-signature">Promise</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line157">EditSystem.js:157</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>startAsync
+Called after all core objects have been initialized.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Promise
+                        
+                    
+            </td>
+            <td class="description last">Promise resolved when this component has completed startup</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="toIntroGraph">
+            <a class="share-icon" href="#toIntroGraph"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                toIntroGraph
+            </span>
+            <span class="signature">()</span><span class="type-signature">string</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line807">EditSystem.js:807</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>toIntroGraph
+This is used to export the intro graph used by the walkthrough.
+This function is indended to be called manually by developers.
+We only use this on very rare occasions to change the walkthrough data.</p>
+<p>To use it:</p>
+<ol>
+<li>Start the walkthrough.</li>
+<li>Get to a &quot;free editing&quot; tutorial step</li>
+<li>Make your edits to the walkthrough map</li>
+<li>In your browser dev console run:  <code>context.systems.editor.toIntroGraph()</code></li>
+<li>This outputs stringified JSON to the browser console (it will be a lot!)</li>
+<li>Copy it to <code>data/intro_graph.json</code> and prettify it in your code editor</li>
+</ol>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        string
+                        
+                    
+            </td>
+            <td class="description last">The stringified walkthrough data</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="toJSON">
+            <a class="share-icon" href="#toJSON"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                toJSON
+            </span>
+            <span class="signature">()</span><span class="type-signature">string</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line885">EditSystem.js:885</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>toJSON
+Save the edit history to JSON.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        string
+                        
+                    
+            </td>
+            <td class="description last">A String containing the JSON, or <code>undefined</code> if nothing to save</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="undo">
+            <a class="share-icon" href="#undo"><span class="glyphicon glyphicon-link"></span></a>
+            <span class="">
+                undo
+            </span>
+            <span class="signature">()</span>
+            
+            
+            
+            
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_EditSystem.js.html#line493">EditSystem.js:493</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>undo
+If there is work-in-progress on the <code>staging</code> edit, revert to <code>stable</code>
+Otherwise, move the <code>stable</code> index back to the previous Edit (or <code>_index = 0</code>).
+Note that all work-in-progress in the <code>staging</code> Edit is lost when calling <code>undo()</code>.</p>
+<p>Before calling <code>undo()</code>:</p>
+<p><code>base</code>           …undo    <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN0
+<code>staging</code> (WIP after Edit2)
+After calling <code>undo()</code>:</p>
+<p><code>base</code>  …undo   <code>stable</code>   redo…
+[ Edit0 --&gt; … --&gt; Edit1 --&gt; Edit2 --&gt; Edit3 ]
+<br>
+--&gt;  EditN1
+<code>staging</code> (WIP after Edit1)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+
+    
+</article>
+
+</section>  
 
 
 

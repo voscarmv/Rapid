@@ -5302,59 +5302,109 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="behaviors_MapNudgingBehavior.js.html">Source: behaviors/MapNudgingBehavior.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>behaviors/MapNudgingBehavior.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { geomViewportNudge  } from '@rapid-sdk/math';
+import { AbstractBehavior } from './AbstractBehavior';
+
+// Scalar for how fast we want the map nudging to actually be.
+// Pixi returns mouse events pretty quickly,
+// so we want to adjust the SDK - provided
+// vector values toned down.
+const nudgeFactor = 0.1;
+
+/**
+ * `MapNudgingBehavior` listens to pointer events and converts those into small
+ *  map panning 'nudges' when the pointer nears the edge of the screen
+ *  useful during drawing modes
+ *
+ * Properties available:
+ *   `enabled`             `true` if the event handlers are enabled, `false` if not.
+ *   `lastDown`            `eventData` Object for the most recent down event
+ *   `gesture`             String containing the current detected gesture ('pan')
+ */
+export class MapNudgingBehavior extends AbstractBehavior {
+
+  /**
+   * @constructor
+   * @param  `context`  Global shared application context
+   */
+  constructor(context) {
+    super(context);
+    this.id = 'map-nudging';
+
+    // Make sure the event handlers have `this` bound correctly
+    this._pointermove = this._pointermove.bind(this);
+  }
+
+
+  /**
+   * enable
+   * Bind event handlers
+   */
+  enable() {
+    if (this._enabled) return;
+    const eventManager = this.context.systems.map.renderer.events;
+    eventManager.on('pointermove', this._pointermove);
+  }
+
+  /**
+   * allow
+   *
+   * Call this method from your mode or your nudging behavior won't work.
+   * unlike other behaviors, we want the modes to control exactly when
+   * this behavior engages. For example, if a user clicks the 'add building'
+   * hotkey or button but hasn't started drawing anything, we don't want the
+   * map to start nudging yet.
+   */
+
+  allow() {
+    this._enabled = true;
+  }
+
+  /**
+   * disable
+   * Unbind event handlers
+   */
+  disable() {
+    if (!this._enabled) return;
+    this._enabled = false;
+    const eventManager = this.context.systems.map.renderer.events;
+    eventManager.off('pointermove', this._pointermove);
+  }
+
+
+  /**
+   * _pointermove
+   * Handler for pointermove events.
+   * @param  `e`  A Pixi FederatedPointerEvent
+   */
+  _pointermove(e) {
+    if (!this._enabled) return;
+
+    const point = [e.global.x, e.global.y];
+    const nudge = geomViewportNudge(point, this.context.systems.map.dimensions);
+    if (nudge) {
+      const [dX, dY] = [nudge[0] * nudgeFactor, nudge[1] * nudgeFactor];
+      const t = this.context.projection.transform();
+      const tNew = { x: t.x + dX, y: t.y + dY, k: t.k };
+      this.context.systems.map.transform(tNew);
+    }
+  }
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5416,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

@@ -5302,59 +5302,123 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="core_AbstractSystem.js.html">Source: core/AbstractSystem.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>core/AbstractSystem.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { EventEmitter } from '@pixi/utils';
+
+
+/**
+ * `AbstractSystem` is the base class from which all systems and services inherit.
+ * "Systems" are the core components of Rapid.
+ * "Services" are extension components that connect to other web services and fetch data.
+ * They are owned by the Context. All systems are EventEmitters
+ *
+ * System Components all go through a standard lifecycle.
+ * `constructor()` -> `initAsync()` -> `startAsync()`
+ *
+ * `constructor()` - called one time and passed the Context.
+ *   At this stage all components are still being constructed, in no particular order.
+ *   You should not call other components or use the context in the constructor.
+ *
+ * initAsync() - called one time after all systems are constructed.
+ *   Systems may check at init time that their dependencies are met.
+ *   They may chain onto other system initAsync promises in order to establish a dependency graph.
+ *   (for example, if DataLoaderSystem must be initialized and ready
+ *    so that the ImagerySystem can start fetching its imagery index)
+ *   initAsync is also a good place to set up event listeners.
+ *   After 'init', the component should mostly be able to function normally.
+ *   You should be able to call methods but there is no user interface yet.
+ *   and no events will be dispatched yet.
+ *
+ * startAsync() - called one time after all systems are initialized
+ *   At this stage we are creating the user interface and the map.
+ *   There is an `autoStart` property that defaults to `true` but can be set `false` for some systems.
+ *   (for example Map3dSystem doesn't need to load and start MapLibre until the user actually decides
+ *    they want to see it - it is another component's job to call `startAsync() in this situation`)
+ *   Like with init, components can chain onto other components startAsync promises they depend on.
+ *   After 'start', the system should be doing its job and dispatching events.
+ *
+ * resetAsync() - called after completing an edit session to reset any internal state
+ *   Resets mainly happen when completing an edit session, but can happen other times
+ *   for example entering/exiting the tutorial or when switching connection between live/dev OSM API.
+ *
+ * Properties you can access:
+ *   `id`        `String`   Identifier for the system (e.g. 'l10n')
+ *   `autoStart` `Boolean`  True to start automatically when initializing the context
+ */
+export class AbstractSystem extends EventEmitter {
+
+  /**
+   * @constructor
+   * @param  `context`  Global shared application context
+   */
+  constructor(context) {
+    super();
+    this.context = context;
+    this.id = '';
+    this.dependencies = new Set();
+    this.autoStart = true;
+
+    this._started = false;
+  }
+
+  /**
+   * started
+   * @readonly
+   */
+  get started() {
+    return this._started;
+  }
+
+
+  /**
+   * initAsync
+   * Called after all core objects have been constructed.
+   * @return {Promise} Promise resolved when this component has completed initialization
+   */
+  initAsync() {
+    for (const id of this.dependencies) {
+      if (!this.context.systems[id]) {
+        return Promise.reject(`Cannot init:  ${this.id} requires ${id}`);
+      }
+    }
+    return Promise.resolve();
+  }
+
+
+  /**
+   * startAsync
+   * Called after all core objects have been initialized.
+   * @return {Promise} Promise resolved when this component has completed startup
+   */
+  startAsync() {
+    this._started = true;
+    return Promise.resolve();
+  }
+
+
+  /**
+   * resetAsync
+   * Called after completing an edit session to reset any internal state
+   * @return {Promise} Promise resolved when this component has completed resetting
+   */
+  resetAsync() {
+    return Promise.resolve();
+  }
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5430,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

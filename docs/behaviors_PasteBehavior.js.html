@@ -5302,59 +5302,156 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="behaviors_PasteBehavior.js.html">Source: behaviors/PasteBehavior.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>behaviors/PasteBehavior.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { Extent, vecSubtract } from '@rapid-sdk/math';
+
+import { AbstractBehavior } from './AbstractBehavior';
+import { actionCopyEntities } from '../actions/copy_entities';
+import { actionMove } from '../actions/move';
+import { utilDetect } from '../util/detect';
+
+const MACOS = (utilDetect().os === 'mac');
+
+
+/**
+ * `PasteBehavior` listens for key event '⌘V' when pasting is allowed
+ */
+export class PasteBehavior extends AbstractBehavior {
+
+  /**
+   * @constructor
+   * @param  `context`  Global shared application context
+   */
+  constructor(context) {
+    super(context);
+    this.id = 'paste';
+
+    // Make sure the event handlers have `this` bound correctly
+    this._keydown = this._keydown.bind(this);
+  }
+
+
+  /**
+   * enable
+   * Bind event handlers
+   */
+  enable() {
+    if (this._enabled) return;
+    this._enabled = true;
+
+    const eventManager = this.context.systems.map.renderer.events;
+    eventManager.on('keydown', this._keydown);
+  }
+
+
+  /**
+   * disable
+   * Unbind event handlers
+   */
+  disable() {
+    if (!this._enabled) return;
+    this._enabled = false;
+
+    const eventManager = this.context.systems.map.renderer.events;
+    eventManager.off('keydown', this._keydown);
+  }
+
+
+  /**
+   * _keydown
+   * Handler for keydown events on the window.
+   * @param  `e`  A DOM KeyboardEvent
+   */
+  _keydown(e) {
+    const modifier = (MACOS &amp;&amp; e.metaKey) || (!MACOS &amp;&amp; e.ctrlKey);
+    if (modifier &amp;&amp; e.key === 'v') {
+      this._doPaste(e);
+    }
+  }
+
+
+  /**
+   * _doPaste
+   * Pastes copied features onto the map, if possible
+   * @param  `e`  A DOM KeyboardEvent
+   */
+  _doPaste(e) {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const l10n = context.systems.l10n;
+    const map = context.systems.map;
+
+    // Note: nearly the same code appears in both PasteBehavior and PasteOperation
+    const copyGraph = context.copyGraph;
+    const copyIDs = context.copyIDs;
+    if (!copyIDs.length) return;   // Nothing to copy..
+
+    // Ignore it if we are not over the canvas
+    // (e.g. sidebar, out of browser window, over a button, toolbar, modal)
+    const eventManager = map.renderer.events;
+    if (!eventManager.pointerOverRenderer) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const action = actionCopyEntities(copyIDs, copyGraph);
+    editor.beginTransaction();
+    editor.perform(action);
+
+    const currGraph = editor.staging.graph;
+    const copies = action.copies();
+
+    const originalIDs = new Set();
+    for (const entity of Object.values(copies)) {
+      originalIDs.add(entity.id);
+    }
+
+    let extent = new Extent();
+    let newIDs = [];
+    for (const [entityID, newEntity] of Object.entries(copies)) {
+      const oldEntity = copyGraph.entity(entityID);
+
+      extent = extent.extend(oldEntity.extent(copyGraph));
+
+      // Exclude child nodes from newIDs if their parent way was also copied.
+      const parents = currGraph.parentWays(newEntity);
+      const parentCopied = parents.some(parent => originalIDs.has(parent.id));
+
+      if (!parentCopied) {
+        newIDs.push(newEntity.id);
+      }
+    }
+
+    // Move pasted features to where mouse pointer is..
+    // (or center of map if there is no readily available pointer coordinate)
+    const projection = context.projection;
+    const copyLoc = context.copyLoc;
+    const copyPoint = (copyLoc &amp;&amp; projection.project(copyLoc)) || projection.project(extent.center());
+    const delta = vecSubtract(map.mouse(), copyPoint);
+    const annotation = l10n.t('operations.paste.annotation', { n: newIDs.length });
+
+    editor.perform(actionMove(newIDs, delta, projection));
+    editor.commit({ annotation: annotation, selectedIDs: newIDs });
+    editor.endTransaction();
+
+    // Put the user in move mode so they can place the pasted features
+    context.enter('move', { selection: { osm: newIDs }} );
+  }
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5463,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

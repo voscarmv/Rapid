@@ -5302,59 +5302,145 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="pixi_PixiLayerEditBlocks.js.html">Source: pixi/PixiLayerEditBlocks.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>pixi/PixiLayerEditBlocks.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { AbstractLayer } from './AbstractLayer';
+import { PixiFeaturePolygon } from './PixiFeaturePolygon';
+
+const MINZOOM = 4;
+
+
+/**
+ * PixiLayerEditBlocks
+ * @class
+ */
+export class PixiLayerEditBlocks extends AbstractLayer {
+
+  /**
+   * @constructor
+   * @param  scene    The Scene that owns this Layer
+   * @param  layerID  Unique string to use for the name of this Layer
+   */
+  constructor(scene, layerID) {
+    super(scene, layerID);
+    this.enabled = true;   // this layer should always be enabled
+    this._oldk = 0;
+  }
+
+
+  /**
+   * enabled
+   * This layer should always be enabled
+   */
+  get enabled() {
+    return true;
+  }
+  set enabled(val) {
+    this._enabled = true;
+  }
+
+
+  /**
+   * render
+   * Render any edit blocking polygons that are visible in the viewport
+   * @param  frame        Integer frame being rendered
+   * @param  projection   Pixi projection to use for rendering
+   * @param  zoom         Effective zoom to use for rendering
+   */
+  render(frame, projection, zoom) {
+    let blocks;
+
+    if (zoom >= MINZOOM) {
+      const viewport = this.context.systems.map.extent().rectangle();
+      const locationSystem = this.context.systems.locations;
+      blocks = locationSystem.wpblocks().bbox(viewport);
+      this.renderEditBlocks(frame, projection, zoom, blocks);
+
+    } else {
+      blocks = [];
+    }
+
+    // setup the explanation
+    // add a special 'api-status' line to the map footer explain the block
+    const explanationRow = this.context.container().select('.main-content > .map-footer')
+      .selectAll('.api-status.blocks')
+      .data(blocks, d => d.id);
+
+    explanationRow.exit()
+      .remove();
+
+    const explanationRowEnter = explanationRow.enter()
+      .insert('div', '.api-status')   // before any existing
+      .attr('class', 'api-status blocks error');
+
+    explanationRowEnter
+      .append('span')
+      .attr('class', 'explanation-item')
+      .text(d => d.text);
+
+    explanationRowEnter
+      .append('a')
+      .attr('target', '_blank')
+      .attr('href', d => d.url)
+      .text('More Info');
+  }
+
+
+  /**
+   * renderEditBlocks
+   * @param  frame        Integer frame being rendered
+   * @param  projection   Pixi projection to use for rendering
+   * @param  zoom         Effective zoom to use for rendering
+   * @param  blocks       Array of block data visible in the view
+   */
+  renderEditBlocks(frame, projection, zoom, blocks) {
+    const locationSystem = this.context.systems.locations;
+    const parentContainer = this.scene.groups.get('blocks');
+    const BLOCK_STYLE = {
+      requireFill: true,    // no partial fill option - must fill fully
+      fill: { pattern: 'construction', color: 0x000001, alpha: 0.7 }
+    };
+
+    for (const d of blocks) {
+      const geometry = locationSystem.feature(d.locationSetID).geometry;  // get GeoJSON
+      if (!geometry) continue;
+
+      const parts = (geometry.type === 'Polygon') ? [geometry.coordinates]
+        : (geometry.type === 'MultiPolygon') ? geometry.coordinates : [];
+
+      for (let i = 0; i &lt; parts.length; ++i) {
+        const coords = parts[i];
+        const featureID = `${this.layerID}-${d.locationSetID}-${i}`;
+        let feature = this.features.get(featureID);
+
+        if (!feature) {
+          feature = new PixiFeaturePolygon(this, featureID);
+          feature.geometry.setCoords(coords);
+          feature.style = BLOCK_STYLE;
+          feature.parentContainer = parentContainer;
+          feature.container.cursor = 'not-allowed';
+          feature.setData(d.locationSetID, d);
+        }
+
+        this.syncFeatureClasses(feature);
+        feature.update(projection, zoom);
+        this.retainFeature(feature, frame);
+      }
+    }
+  }
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5452,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

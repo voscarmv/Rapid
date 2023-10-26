@@ -5302,59 +5302,776 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="modes_DrawAreaMode.js.html">Source: modes/DrawAreaMode.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>modes/DrawAreaMode.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { vecEqual, vecLength } from '@rapid-sdk/math';
+
+import { AbstractMode } from './AbstractMode';
+import { actionAddEntity } from '../actions/add_entity';
+import { actionAddMidpoint } from '../actions/add_midpoint';
+import { actionAddVertex } from '../actions/add_vertex';
+import { actionMoveNode } from '../actions/move_node';
+import { geoChooseEdge } from '../geo';
+import { osmNode, osmWay } from '../osm';
+import { cursors } from './index';
+
+const DEBUG = false;
+
+
+/**
+ * `DrawAreaMode`
+ * In this mode, we are drawing a new area.
+ */
+export class DrawAreaMode extends AbstractMode {
+
+  /**
+   * @constructor
+   * @param  `context`  Global shared application context
+   */
+  constructor(context) {
+    super(context);
+    this.id = 'draw-area';
+
+    this.defaultTags = {};
+    this.drawWayID = null;    // The draw way just contains the way that we are drawing
+    this.drawNodeID = null;   // The draw node is temporary and just follows the pointer
+    this.firstNodeID = null;  // The first real node in the draw way (this is also the last node that closes the area)
+    this.lastNodeID = null;   // The last real node in the draw way (technically it's the node before the draw node)
+
+    // So for a closed draw way like:
+    //
+    //  A --> B
+    //  ^     |
+    //  |     v
+    //  D &lt;-- C
+    //
+    // A is the firstNode
+    // C is the lastNode
+    // D is the drawNode, temporary and will be rolled back in `exit()`
+    // A or C can be clicked on to finish the way
+
+    // The history index when we start drawing
+    this._editIndex = null;
+
+    // Watch coordinates to determine if we have moved enough
+    this._lastCoord = null;
+
+    // To deal with undo/redo, we take snapshots on every commit, keyed to the stable graph.
+    // If we ever find ourself in an edit where we can't retrieve this information, leave `DrawLineMode`.
+    // This means we've undo/redoed into an edit where the user wasn't drawing lines.
+    // It's kinda hack, but I dont know what else to do right now.
+    this._snapshots = new Map();
+
+    // Make sure the event handlers have `this` bound correctly
+    this._cancel = this._cancel.bind(this);
+    this._click = this._click.bind(this);
+    this._finish = this._finish.bind(this);
+    this._hover = this._hover.bind(this);
+    this._move = this._move.bind(this);
+    this._restoreSnapshot = this._restoreSnapshot.bind(this);
+  }
+
+
+  /**
+   * enter
+   * Enters the mode.
+   */
+  enter() {
+    if (DEBUG) {
+      console.log('DrawAreaMode: entering'); // eslint-disable-line no-console
+    }
+
+    const context = this.context;
+    const editor = context.systems.editor;
+
+    this._active = true;
+    this.defaultTags = { area: 'yes' };
+    this.drawWayID = null;
+    this.drawNodeID = null;
+    this.lastNodeID = null;
+    this.firstNodeID = null;
+    this._lastCoord = null;
+    this._selectedData.clear();
+
+    const eventManager = context.systems.map.renderer.events;
+    eventManager.setCursor('crosshair');
+
+    context.enableBehaviors(['hover', 'draw', 'map-interaction', 'map-nudging']);
+
+    context.behaviors.hover
+      .on('hoverchange', this._hover);
+
+    context.behaviors.draw
+      .on('move', this._move)
+      .on('click', this._click)
+      .on('finish', this._finish)
+      .on('cancel', this._cancel);
+
+    editor
+      .on('historyjump', this._restoreSnapshot);
+
+    context.behaviors['map-interaction'].doubleClickEnabled = false;
+
+    editor.setCheckpoint('beginDraw');
+    this._editIndex = editor.index;
+
+    return true;
+  }
+
+
+  /**
+   * exit
+   */
+  exit() {
+    if (!this._active) return;
+    this._active = false;
+
+    if (DEBUG) {
+      console.log('DrawAreaMode: exiting'); // eslint-disable-line no-console
+    }
+
+    const context = this.context;
+    const editor = context.systems.editor;
+    const scene = context.systems.map.scene;
+
+    const eventManager = context.systems.map.renderer.events;
+    eventManager.setCursor('grab');
+
+    context.behaviors.hover
+      .off('hoverchange', this._hover);
+
+    context.behaviors.draw
+      .off('move', this._move)
+      .off('click', this._click)
+      .off('finish', this._finish)
+      .off('cancel', this._cancel);
+
+    editor
+      .off('historyjump', this._restoreSnapshot);
+
+    editor.beginTransaction();
+    editor.revert();    // revert work-in-progress, i.e. the temporary drawing node
+
+    // Confirm that the draw way exists and is valid..
+    // If any issues, revert back to how things were before we started.
+    const graph = editor.stable.graph;
+    const drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    const length = drawWay?.nodes?.length || 0;
+    if (length &lt; 4) {
+      if (DEBUG) {
+        console.log('DrawAreaMode: draw way invalid, rolling back');  // eslint-disable-line no-console
+      }
+      if (editor.index > this._editIndex) {
+        while (editor.index !== this._editIndex) {
+          editor.undo();
+        }
+      } else if (editor.index &lt; this._editIndex) {
+        editor.restoreCheckpoint('beginDraw');
+      }
+    }
+
+    this.drawWayID = null;
+    this.drawNodeID = null;
+    this.lastNodeID = null;
+    this.firstNodeID = null;
+    this._editIndex = null;
+    this._lastCoord = null;
+
+    this._selectedData.clear();
+    scene.clearClass('drawing');
+
+    window.setTimeout(() => {
+      context.behaviors['map-interaction'].doubleClickEnabled = true;
+    }, 1000);
+
+    editor.endTransaction();
+  }
+
+
+  /**
+   * _refreshEntities
+   *  Confirms that the drawing entities all exist in the graph after any modifications.
+   *  Updates `selectedData` collection to include the draw way
+   *  Updates `drawing` class for items that need it
+   */
+  _refreshEntities() {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const scene = context.systems.map.scene;
+
+    scene.clearClass('drawing');
+    this._selectedData.clear();
+
+    const graph = editor.staging.graph;
+    const drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    const drawNode = this.drawWayID &amp;&amp; graph.hasEntity(this.drawNodeID);
+    const lastNode = this.lastNodeID &amp;&amp; graph.hasEntity(this.lastNodeID);
+    const firstNode = this.firstNodeID &amp;&amp; graph.hasEntity(this.firstNodeID);
+
+    // Sanity check - Bail out if any of these are missing.
+    if (!drawWay || !lastNode || !firstNode) {
+      // debugger;
+      this._cancel();
+      return;
+    }
+
+    // drawNode may or may not exist, it will be recreated after the user moves the pointer.
+    if (drawNode) {
+      scene.classData('osm', drawNode.id, 'drawing');
+    }
+
+    scene.classData('osm', drawWay.id, 'drawing');
+    this._selectedData.set(drawWay.id, drawWay);
+  }
+
+
+  /**
+   * _getAnnotation
+   * An annotation is a text associated with the edit, such as "Started an area".
+   * @return  {string?}  String such as "Started an area", or undefined if the drawWay is incomplete
+   */
+  _getAnnotation() {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const graph = editor.staging.graph;
+    const l10n = context.systems.l10n;
+
+    const drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    const length = drawWay?.nodes?.length || 0;
+    if (length &lt; 4) return undefined;
+
+    const which = length > 4 ? 'continue' : 'start';
+    return l10n.t(`operations.${which}.annotation.area`);
+  }
+
+
+  /**
+   * _move
+   * Move the draw node, or create one if needed.
+   * @param  {Object}  eventData - Object containing data about the event and what was targeted
+   */
+  _move(eventData) {
+    if (!this.drawWayID) return;  // haven't started drawing yet
+
+    const context = this.context;
+    const editor = context.systems.editor;
+    const projection = context.projection;
+    const coord = eventData.coord;
+    let loc = projection.invert(coord);
+
+    // How much has the pointer moved?
+    const dist = this._lastCoord ? vecLength(coord, this._lastCoord) : 0;
+    this._lastCoord = coord;
+
+    let graph = editor.staging.graph;
+    let drawNode = this.drawNodeID &amp;&amp; graph.hasEntity(this.drawNodeID);
+
+    editor.beginTransaction();
+
+    // If the draw node has gone missing (probably due to undo/redo), replace it.
+    // We check distance to account for the situation where the user is undoing/redoing.
+    // Exit out of here if the user is just hitting keys and not actually moving the pointer.
+    // (counterintuitively:  we will still receive 'move' events if the user is
+    //  just hitting modifier keys without moving!  This is to handle snap/unsnap.)
+    if (!drawNode) {
+      if (dist > 1) {  // The user is moving the pointer so we really need a draw node!
+        drawNode = this._addDrawNode();
+        graph = editor.staging.graph;
+      } else {         // Never mind, the user is undoing/redoing - not moving!
+        editor.endTransaction();
+        return;
+      }
+    }
+
+    // Calculate snap, if any..
+    // Allow snapping only for OSM Entities in the current graph (i.e. not Rapid features)
+    const datum = eventData?.target?.data;
+    const choice = eventData?.target?.choice;
+    const target = datum &amp;&amp; graph.hasEntity(datum.id);
+
+    // Snap to a node
+    if (target?.type === 'node') {
+      loc = target.loc;
+
+    // Snap to a way
+//    } else if (target?.type === 'way' &amp;&amp; choice) {
+//      loc = choice.loc;
+//    }
+    } else if (target?.type === 'way') {
+      const choice = geoChooseEdge(graph.childNodes(target), coord, projection, drawNode.id);
+      const SNAP_DIST = 6;  // hack to avoid snap to fill, see #719
+      if (choice &amp;&amp; choice.distance &lt; SNAP_DIST) {
+        loc = choice.loc;
+      }
+    }
+
+    editor.perform(actionMoveNode(drawNode.id, loc));
+
+    this._refreshEntities();
+    editor.endTransaction();
+  }
+
+
+  /**
+   * _click
+   * Process whatever the user clicked on.
+   * @param  {Object}  eventData - Object containing data about the event and what was targeted
+   */
+  _click(eventData) {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const locations = context.systems.locations;
+    const projection = context.projection;
+    const coord = eventData.coord;
+    let loc = projection.invert(coord);
+
+    if (locations.blocksAt(loc).length) return;   // editing is blocked here
+
+    const eventManager = context.systems.map.renderer.events;
+    eventManager.setCursor('crosshair');
+
+    let graph = editor.staging.graph;
+    let drawNode = this.drawNodeID &amp;&amp; graph.hasEntity(this.drawNodeID);
+
+    // Start transaction now - if we are making a draw node, we want it included.
+    editor.beginTransaction();
+
+    // If draw node has gone missing (probably due to undo/redo), replace it.
+    // Note that we don't need the distance checking code here that we have in `_move()`.
+    // If we receive a 'click', we really do need a draw node now!
+    if (this.drawWayID &amp;&amp; !drawNode) {
+      drawNode = this._addDrawNode();
+      graph = editor.staging.graph;
+    }
+
+    // Now that the user has clicked, let them nudge the map by moving to the edge.
+    context.behaviors['map-nudging'].allow();
+
+    // Calculate snap, if any..
+    // Allow snapping only for OSM Entities in the current graph (i.e. not Rapid features)
+    const datum = eventData?.target?.data;
+    const choice = eventData?.target?.choice;
+    const target = datum &amp;&amp; graph.hasEntity(datum.id);
+    let node, edge;
+
+    // Snap to a node
+    if (target?.type === 'node') {
+      loc = target.loc;
+      node = target;
+
+    // Snap to a way
+//  } else if (target?.type === 'way' &amp;&amp; choice) {
+//      const edge = [ target.nodes[choice.index - 1], target.nodes[choice.index] ];
+//      this._clickWay(choice.loc, edge);
+//      return;
+//    }
+    } else if (target?.type === 'way') {
+      const choice = geoChooseEdge(graph.childNodes(target), coord, projection, this.drawNodeID);
+      const SNAP_DIST = 6;  // hack to avoid snap to fill, see #719
+      if (choice &amp;&amp; choice.distance &lt; SNAP_DIST) {
+        loc = choice.loc;
+        edge = [ target.nodes[choice.index - 1], target.nodes[choice.index] ];
+      }
+    }
+
+    // Handle whatever was clicked on.
+    // The `_click?` functions below are responsible for calling `_refreshEntities()` and `endTransaction()`
+    // because in certain situations we will be finishing the line and jumping right into `exit()`
+    if (node) {
+      this._clickNode(loc, node);
+    } else if (edge) {
+      this._clickWay(loc, edge);
+    } else {
+      this._clickLoc(loc);
+    }
+    // in other words... do not put code here - we might have already exited the mode!
+  }
+
+
+  /**
+   * _clickLoc
+   * Clicked on nothing, created a point at the given 'loc'.
+   */
+  _clickLoc(loc) {
+    const EPSILON = 1e-6;
+    const context = this.context;
+    const editor = context.systems.editor;
+
+    let graph = editor.staging.graph;
+    let drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    let drawNode = this.drawNodeID &amp;&amp; graph.hasEntity(this.drawNodeID);
+    let lastNode = this.lastNodeID &amp;&amp; graph.hasEntity(this.lastNodeID);
+    let firstNode = this.firstNodeID &amp;&amp; graph.hasEntity(this.firstNodeID);
+
+    // Extend area by adding vertex at 'loc'...
+    if (drawWay) {
+      // The drawNode is at the first or last node, try to finish the area.
+      // (Normally this situation would be caught in `_clickNode`, maybe the user held down modifier key?)
+      if (vecEqual(loc, lastNode.loc, EPSILON) || vecEqual(loc, firstNode.loc, EPSILON)) {
+        this._finish();
+        return;
+      }
+
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickLoc, extending area to ${loc}`);  // eslint-disable-line no-console
+      }
+
+      // If the area has enough segments, commit the work in progress so we can undo/redo to it.
+      const annotation = this._getAnnotation();
+      if (annotation) {
+        editor.commit({ annotation: annotation, selectedIDs: [drawWay.id] });
+        this._takeSnapshot(firstNode.id, drawNode.id);
+      }
+
+      // Replace draw node
+      this.lastNodeID = drawNode.id;
+      this._addDrawNode(loc);
+
+
+    // Start a new area at 'loc'...
+    } else {
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickLoc, starting area at ${loc}`); // eslint-disable-line no-console
+      }
+      firstNode = osmNode({ loc: loc });
+      drawNode = osmNode({ loc: loc });
+      drawWay = osmWay({
+        tags: this.defaultTags,
+        nodes: [ firstNode.id, drawNode.id, firstNode.id ]
+      });
+
+      this.firstNodeID = firstNode.id;
+      this.lastNodeID = firstNode.id;
+      this.drawNodeID = drawNode.id;
+      this.drawWayID = drawWay.id;
+
+      editor.perform(
+        actionAddEntity(firstNode),
+        actionAddEntity(drawNode),
+        actionAddEntity(drawWay)
+      );
+    }
+
+    this._refreshEntities();
+    editor.endTransaction();
+  }
+
+
+  /**
+   * _clickWay
+   * Clicked on an existing way, add a midpoint along the `edge` at given `loc` and start area from there
+   */
+  _clickWay(loc, edge) {
+    const EPSILON = 1e-6;
+    const context = this.context;
+    const editor = context.systems.editor;
+    const midpoint = { loc: loc, edge: edge };
+
+    let graph = editor.staging.graph;
+    let drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    let drawNode = this.drawNodeID &amp;&amp; graph.hasEntity(this.drawNodeID);
+    let lastNode = this.lastNodeID &amp;&amp; graph.hasEntity(this.lastNodeID);
+    let firstNode = this.firstNodeID &amp;&amp; graph.hasEntity(this.firstNodeID);
+
+    // Extend area by adding vertex as midpoint along target edge...
+    if (drawWay) {
+      // The drawNode is at the start or end node, try to finish the line.
+      // (Normally this situation would be caught in `_clickNode`, maybe the user held down modifier key?)
+      if (vecEqual(loc, lastNode.loc, EPSILON) || vecEqual(loc, firstNode.loc, EPSILON)) {
+        this._finish();
+        return;
+      }
+
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickWay, extending area to edge ${edge}`);  // eslint-disable-line no-console
+      }
+
+      editor.perform(
+        actionMoveNode(drawNode.id, loc),       // Finalize position of draw node at `loc`
+        actionAddMidpoint(midpoint, drawNode)   // Add draw node as a midpoint on target edge
+      );
+
+      // If the area has enough segments, commit the work in progress so we can undo/redo to it.
+      const annotation = this._getAnnotation();
+      if (annotation) {
+        editor.commit({ annotation: annotation, selectedIDs: [drawWay.id] });
+        this._takeSnapshot(firstNode.id, drawNode.id);
+      }
+
+      // Replace draw node
+      this.lastNodeID = drawNode.id;
+      this._addDrawNode(loc);
+
+
+    // Start a new area at `loc` on target edge...
+    } else {
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickWay, starting area at edge ${edge}`);  // eslint-disable-line no-console
+      }
+      firstNode = osmNode({ loc: loc });
+      drawNode = osmNode({ loc: loc });
+      drawWay = osmWay({
+        tags: this.defaultTags,
+        nodes: [ firstNode.id, drawNode.id, firstNode.id ]
+      });
+
+      this.firstNodeID = firstNode.id;
+      this.lastNodeID = firstNode.id;
+      this.drawNodeID = drawNode.id;
+      this.drawWayID = drawWay.id;
+
+      editor.perform(
+        actionAddEntity(firstNode),              // Create first node
+        actionAddEntity(drawNode),               // Create new draw node (end)
+        actionAddEntity(drawWay),                // Create new draw way
+        actionAddMidpoint(midpoint, firstNode)   // Add first node as midpoint on target edge
+      );
+    }
+
+    this._refreshEntities();
+    editor.endTransaction();
+  }
+
+
+  /**
+   * _clickNode
+   * Clicked on an existing node, include that node in the area we are drawing.
+   */
+  _clickNode(loc, targetNode) {
+    const EPSILON = 1e-6;
+    const context = this.context;
+    const editor = context.systems.editor;
+
+    let graph = editor.staging.graph;
+    let drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+    let drawNode = this.drawNodeID &amp;&amp; graph.hasEntity(this.drawNodeID);
+    let lastNode = this.lastNodeID &amp;&amp; graph.hasEntity(this.lastNodeID);
+    let firstNode = this.firstNodeID &amp;&amp; graph.hasEntity(this.firstNodeID);
+
+    // Extend area by reusing target node as a vertex...
+    // (Note that we don't need to replace the draw node in this scenario)
+    if (drawWay) {
+
+      // Target node is the first or last node, try to finish the area
+      if (targetNode.id === lastNode.id || targetNode.id === firstNode.id ||
+        vecEqual(loc, lastNode.loc, EPSILON) || vecEqual(loc, firstNode.loc, EPSILON)
+      ) {
+        this._finish();
+        return;
+      }
+
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickNode, extending area to ${targetNode.id}`);  // eslint-disable-line no-console
+      }
+
+      editor.perform(
+        this._actionRemoveDrawNode(drawWay, drawNode),   // Remove the draw node from the draw way
+        actionAddVertex(drawWay.id, targetNode.id)       // Add target node to draw way
+      );
+
+      // If the area has enough segments, commit the work in progress so we can undo/redo to it.
+      const annotation = this._getAnnotation();
+      if (annotation) {
+        editor.commit({ annotation: annotation, selectedIDs: [drawWay.id] });
+        this._takeSnapshot(firstNode.id, targetNode.id);
+      }
+
+      // Target node is some other node - put the draw node back and continue drawing..
+      this.lastNodeID = targetNode.id;
+      editor.perform(
+        actionAddEntity(drawNode),
+        actionAddVertex(drawWay.id, drawNode.id)
+      );
+
+    // Start a new area at target node...
+    } else {
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _clickNode, starting line at ${targetNode.id}`); // eslint-disable-line no-console
+      }
+
+      drawNode = osmNode({ loc: loc });
+      drawWay = osmWay({
+        tags: this.defaultTags,
+        nodes: [ targetNode.id, drawNode.id, targetNode.id ]
+      });
+
+      this.firstNodeID = targetNode.id;
+      this.lastNodeID = targetNode.id;
+      this.drawNodeID = drawNode.id;
+      this.drawWayID = drawWay.id;
+
+      editor.perform(
+        actionAddEntity(drawNode),   // Create new draw node
+        actionAddEntity(drawWay)     // Create new draw way
+      );
+    }
+
+    this._refreshEntities();
+    editor.endTransaction();
+  }
+
+
+  /**
+   * _actionRemoveDrawNode
+   */
+  _actionRemoveDrawNode(drawWay, drawNode) {
+    return (graph) => {
+      return graph.replace(graph.entity(drawWay.id).removeNode(drawNode.id)).remove(drawNode);
+    };
+  }
+
+
+  /**
+   * _addDrawNode
+   */
+  _addDrawNode(loc) {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const map = context.systems.map;
+
+    const drawNode = osmNode({ loc: loc ?? map.mouseLoc() });
+    this.drawNodeID = drawNode.id;
+
+    editor.perform(
+      actionAddEntity(drawNode),                     // Create new draw node
+      actionAddVertex(this.drawWayID, drawNode.id)   // Add new draw node to draw way
+    );
+
+    return drawNode;
+  }
+
+
+  /**
+   * _finish
+   * Done drawing, select the draw way or return to browse mode.
+   * Note that `exit()` will be called immediately after this to perform cleanup.
+   */
+  _finish() {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const graph = editor.staging.graph;
+    const drawWay = this.drawWayID &amp;&amp; graph.hasEntity(this.drawWayID);
+
+    if (drawWay) {
+      if (DEBUG) {
+        console.log(`DrawAreaMode: _finish, drawWay.id = ${drawWay.id}`);  // eslint-disable-line no-console
+      }
+      context.enter('select-osm', { selection: { osm: [drawWay.id] }, newFeature: true });
+    } else {
+      context.enter('browse');
+    }
+  }
+
+
+  /**
+   * _cancel
+   * Cancel all drawing and return to browse mode.
+   * Note that `exit()` will be called immediately after this to perform cleanup.
+   */
+  _cancel() {
+    if (DEBUG) {
+      console.log(`DrawAreaMode: _cancel`); // eslint-disable-line no-console
+    }
+    // Nulling the draw way will cause `exit()` to revert back
+    // to the way things were before we started drawing.
+    this.drawWayID = null;
+    this.context.enter('browse');
+  }
+
+
+  /**
+   * _takeSnapshot
+   * To deal with undo/redo, we take snapshots of the drawing entityIDs after every commit, keyed to the stable graph.
+   * If we ever find ourself in an edit where we can't retrieve this information, leave `DrawAreaMode`.
+   * This means we've undo/redoed into an edit where the user wasn't drawing the same area.
+   */
+  _takeSnapshot(firstNodeID, lastNodeID) {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const graph = editor.stable.graph;
+
+    const snapshot = {
+      drawWayID:   this.drawWayID,
+      firstNodeID: firstNodeID,
+      lastNodeID:  lastNodeID
+    };
+
+    this._snapshots.set(graph, snapshot);
+  }
+
+
+  /**
+   * _restoreSnapshot
+   * This gets called after undo/redo/restore.
+   * Here we attempt to restore the drawing entityIDs from a snapshot.
+   * If we ever find ourself in an edit where we can't retrieve this information, leave `DrawAreaMode`.
+   * This means we've undo/redoed into an edit where the user wasn't drawing the same area.
+   */
+  _restoreSnapshot() {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const graph = editor.stable.graph;
+    const snapshot = this._snapshots.get(graph);
+
+    // If we have undo/redoed into a state where we are drawing this same line,
+    // restore the state and stay in `DrawLineMode`.
+    if (snapshot &amp;&amp; snapshot.drawWayID === this.drawWayID) {
+      this.firstNodeID = snapshot.firstNodeID;
+      this.lastNodeID = snapshot.lastNodeID;
+      this.drawNodeID = null;   // will be recreated after the user moves the pointer
+      this._refreshEntities();
+
+    } else {   // Otherwise, return to select or browse mode (MapSystem has similar code to this)
+      const checkIDs = editor.stable.selectedIDs ?? [];
+      const selectedIDs = checkIDs.filter(entityID => graph.hasEntity(entityID));
+      if (selectedIDs.length) {
+        context.enter('select-osm', { selection: { osm: selectedIDs }} );
+      } else {
+        context.enter('browse');
+      }
+    }
+  }
+
+
+  /**
+   * _hover
+   * Changes the cursor styling based on what geometry is hovered
+   */
+  _hover(eventData) {
+    const context = this.context;
+    const editor = context.systems.editor;
+    const graph = editor.staging.graph;
+    const eventManager = context.systems.map.renderer.events;
+
+    const target = eventData.target;
+    const datum = target?.data;
+    const entity = datum &amp;&amp; graph.hasEntity(datum.id);
+    const geom = entity?.geometry(graph) ?? 'unknown';
+
+    switch (geom) {
+      case 'line':
+        eventManager.setCursor(cursors.connectLineCursor);
+        break;
+      case 'vertex':
+        eventManager.setCursor(cursors.connectVertexCursor);
+        break;
+      default:
+        eventManager.setCursor('crosshair');
+    }
+  }
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +6083,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

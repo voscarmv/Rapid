@@ -5302,59 +5302,344 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="pixi_PixiGeometry.js.html">Source: pixi/PixiGeometry.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>pixi/PixiGeometry.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { Extent, geomGetSmallestSurroundingRectangle, vecInterp } from '@rapid-sdk/math';
+import { polygonHull as d3_polygonHull, polygonCentroid as d3_polygonCentroid } from 'd3-polygon';
+import polylabel from '@mapbox/polylabel';
+
+
+/**
+ * PixiGeometry
+ * Wrapper for geometry data, used by the various PixiFeatureXXX classes
+ * Because recalculating and reprojecting geometry is expensive, this class tries to do it only if necessary.
+ *
+ * The geometry data should be passed to `setCoords()`
+ *
+ * Properties you can access:
+ *   `type`          String describing what kind of geometry this is ('point', 'line', 'polygon')
+ *   `origCoords`    Original coordinate data (in WGS84 long/lat)
+ *   `origExtent`    Original extent (the bounds of the geometry)
+ *   `origHull`      Original convex hull
+ *   `origCentroid`  Original centroid (center of mass / rotation), [ lon, lat ]
+ *   `origPoi`       Original pole of inaccessability, [ lon, lat ]
+ *   `origSsr`       Original smallest surrounding rectangle
+ *   `coords`        Projected coordinate data
+ *   `extent`        Projected extent
+ *   `outer`         Projected outer ring, Array of coordinate pairs [ [x,y], [x,y], … ]
+ *   `flatOuter`     Projected outer ring, flat Array how Pixi wants it [ x,y, x,y, … ]
+ *   `holes`         Projected hole rings, Array of Array of coordinate pairs [ [ [x,y], [x,y], … ] ]
+ *   `flatHoles`     Projected hole rings, Array of flat Array how Pixi wants it [ [ x,y, x,y, … ] ]
+ *   `hull`          Projected convex hull, Array of coordinate pairs [ [x,y], [x,y], … ]
+ *   `centroid`      Projected centroid, [x, y]
+ *   `poi`           Projected pole of inaccessability, [x, y]
+ *   `ssr`           Projected smallest surrounding rectangle data (angle, poly)
+ *   `width`         Width of projected shape, in pixels
+ *   `height`        Height of projected shape, in pixels
+ *   `lod`           Level of detail for the geometry (0 = off, 1 = simplified, 2 = full)
+ */
+export class PixiGeometry {
+
+  /**
+   * @constructor
+   */
+  constructor() {
+    this.type = null;      // 'point', 'line', or 'polygon'
+    this.dirty = true;
+    this.reset();
+  }
+
+
+  /**
+   * destroy
+   * Release memory.
+   * Do not use the geometry after calling `destroy()`.
+   */
+  destroy() {
+    this.reset();
+  }
+
+
+  /**
+   * reset
+   * Remove all stored data
+   */
+  reset() {
+    // Original data - These are in WGS84 coordinates
+    // ([0,0] is Null Island)
+    this.origCoords = null;     // coordinate data
+    this.origExtent = null;     // extent (bounding box)
+    this.origHull = null;       // convex hull
+    this.origCentroid = null;   // centroid (center of mass / rotation)
+    this.origPoi = null;        // pole of inaccessability
+    this.origSsr = null;        // smallest surrounding rectangle
+
+    // The rest of the data is projected data in screen coordinates
+    // ([0,0] is the origin of the Pixi scene)
+    this.coords = null;
+    this.extent = null;
+    this.hull = null;
+    this.centroid = null;
+    this.poi = null;
+    this.ssr = null;
+
+    this.outer = null;
+    this.flatOuter = null;
+    this.holes = null;
+    this.flatHoles = null;
+
+    this.width = 0;
+    this.height = 0;
+    this.lod = 0;
+  }
+
+
+  /**
+   * update
+   * @param  projection  Pixi projection to use for rendering
+   * @param  zoom        Effective zoom to use for rendering
+   */
+  update(projection) {
+    if (!this.dirty || !this.origCoords || !this.origExtent) return;  // nothing to do
+    this.dirty = false;
+
+    // reset all projected properties
+    this.coords = null;
+    this.extent = null;
+    this.outer = null;
+    this.flatOuter = null;
+    this.holes = null;
+    this.flatHoles = null;
+    this.hull = null;
+    this.centroid = null;
+    this.poi = null;
+    this.ssr = null;
+
+    // Points are simple, just project once.
+    if (this.type === 'point') {
+      this.coords = projection.project(this.origCoords);
+      this.extent = new Extent(this.coords);
+      this.centroid = this.coords;
+      this.width = 0;
+      this.height = 0;
+      this.lod = 2;  // full detail
+      return;
+    }
+
+    // A line or a polygon.
+
+    // First, project extent..
+    this.extent = new Extent();
+    // Watch out, we can't project min/max directly (because Y is flipped).
+    // Construct topLeft, bottomRight corners and project those.
+    this.extent.min = projection.project([this.origExtent.min[0], this.origExtent.max[1]]);  // top-left
+    this.extent.max = projection.project([this.origExtent.max[0], this.origExtent.min[1]]);  // bottom-right
+
+    const [minX, minY] = this.extent.min;
+    const [maxX, maxY] = this.extent.max;
+    this.width = maxX - minX;
+    this.height = maxY - minY;
+
+    // So small, don't waste time on it.
+    if (this.width &lt; 4 &amp;&amp; this.height &lt; 4) {
+      this.lod = 0;
+      return;
+    }
+
+
+    // Reproject the coordinate data..
+    // Generate both normal coordinate rings and flattened rings at the same time to avoid extra iterations.
+    // Preallocate Arrays to avoid garbage collection formerly caused by excessive Array.push()
+    const origRings = (this.type === 'line') ? [this.origCoords] : this.origCoords;
+    const projRings = new Array(origRings.length);
+    const projFlatRings = new Array(origRings.length);
+
+    for (let i = 0; i &lt; origRings.length; ++i) {
+      const origRing = origRings[i];
+      projRings[i] = new Array(origRing.length);
+      projFlatRings[i] = new Array(origRing.length * 2);
+
+      for (let j = 0; j &lt; origRing.length; ++j) {
+        const xy = projection.project(origRing[j]);
+        projRings[i][j] = xy;
+        projFlatRings[i][j * 2] = xy[0];
+        projFlatRings[i][j * 2 + 1] = xy[1];
+      }
+    }
+
+    // Assign outer and holes
+    if (this.type === 'line') {
+      this.coords = projRings[0];
+      this.outer = projRings[0];
+      this.flatOuter = projFlatRings[0];
+      this.holes = null;
+      this.flatHoles = null;
+    } else {
+      this.coords = projRings;
+      this.outer = projRings[0];
+      this.flatOuter = projFlatRings[0];
+      this.holes = projRings.slice(1);
+      this.flatHoles = projFlatRings.slice(1);
+    }
+
+    // Calculate hull, centroid, poi, ssr if possible
+    if (this.outer.length === 0) {          // no coordinates? - shouldn't happen
+      // no-op
+
+    } else if (this.outer.length === 1) {   // single coordinate? - wrong but can happen
+      this.centroid = this.outer[0];
+      this.origCentroid = projection.invert(this.centroid);
+      this.poi = this.centroid;
+      this.origPoi = this.origCentroid;
+
+    } else if (this.outer.length === 2) {   // 2 coordinate line
+      this.centroid = vecInterp(this.outer[0], this.outer[1], 0.5);  // average the 2 points
+      this.origCentroid = projection.invert(this.centroid);
+      this.poi = this.centroid;
+      this.origPoi = this.origCentroid;
+
+    } else {     // > 2 coordinates...
+
+      // Convex Hull
+      if (this.origHull) {   // calculated already, reproject
+        this.hull = new Array(this.origHull.length);
+        for (let i = 0; i &lt; this.origHull.length; ++i) {
+          this.hull[i] = projection.project(this.origHull[i]);
+        }
+      } else {               // recalculate and store as WGS84
+        this.hull = d3_polygonHull(this.outer);
+        if (this.hull) {
+          this.origHull = new Array(this.hull.length);
+          for (let i = 0; i &lt; this.origHull.length; ++i) {
+            this.origHull[i] = projection.invert(this.hull[i]);
+          }
+        }
+      }
+
+      // Centroid
+      if (this.origCentroid) {   // calculated already, reproject
+        this.centroid = projection.project(this.origCentroid);
+      } else if (this.hull) {    // recalculate and store as WGS84
+        if (this.hull.length === 2) {
+          this.centroid = vecInterp(this.hull[0], this.hull[1], 0.5);  // average the 2 points
+        } else {
+          this.centroid = d3_polygonCentroid(this.hull);
+        }
+        this.origCentroid = projection.invert(this.centroid);
+      }
+
+      // Pole of Inaccessability
+      if (this.origPoi) {    // calculated already, reproject
+        this.poi = projection.project(this.origPoi);
+      } else {               // recalculate and store as WGS84
+        this.poi = polylabel(this.coords);   // it expects outer + rings
+        this.origPoi = projection.invert(this.poi);
+      }
+
+      // Smallest Surrounding Rectangle
+      if (this.origSsr) {        // calculated already, reproject
+        this.ssr = { angle: this.origSsr.angle, poly: new Array(this.origSsr.poly.length) };
+        for (let i = 0; i &lt; this.origSsr.poly.length; ++i) {
+          this.ssr.poly[i] = projection.project(this.origSsr.poly[i]);
+        }
+      } else if (this.hull) {    // recalculate and store as WGS84
+        this.ssr = geomGetSmallestSurroundingRectangle(this.hull);
+        if (this.ssr) {
+          this.origSsr = { angle: this.ssr.angle, poly: new Array(this.ssr.poly.length) };
+          for (let i = 0; i &lt; this.ssr.poly.length; ++i) {
+            this.origSsr.poly[i] = projection.invert(this.ssr.poly[i]);
+          }
+        }
+      }
+    }
+
+    this.lod = 2;   // full detail (for now)
+  }
+
+
+  /**
+   * setCoords
+   * @param  data  Geometry `Array` (contents depends on the Feature type)
+   *
+   * 'point' - Single wgs84 coordinate
+   *    [lon, lat]
+   *
+   * 'line' - Array of coordinates
+   *    [ [lon, lat], [lon, lat],  … ]
+   *
+   * 'polygon' - Array of Arrays
+   *    [
+   *      [ [lon, lat], [lon, lat], … ],   // outer ring
+   *      [ [lon, lat], [lon, lat], … ],   // inner rings
+   *      …
+   *    ]
+   */
+  setCoords(data) {
+    const type = this._inferType(data);
+    if (!type) return;  // do nothing if data is missing
+
+    this.reset();
+    this.type = type;
+    this.origCoords = data;
+    this.origExtent = new Extent();
+
+    // Determine extent (bounds)
+    const bounds = this.origExtent;
+
+    if (type === 'point') {
+      bounds.min = data;
+      bounds.max = data;
+      this.origCentroid = data;
+
+    } else {
+      const origRings = (this.type === 'line') ? [this.origCoords] : this.origCoords;
+      for (let i = 0; i &lt; origRings.length; ++i) {
+        const origRing = origRings[i];
+        for (let j = 0; j &lt; origRing.length; ++j) {
+          const [lon, lat] = origRing[j];
+          bounds.min = [ Math.min(bounds.min[0], lon), Math.min(bounds.min[1], lat) ];
+          bounds.max = [ Math.max(bounds.max[0], lon), Math.max(bounds.max[1], lat) ];
+        }
+      }
+    }
+
+    this.dirty = true;
+  }
+
+
+  /**
+   * _inferType
+   * Determines what kind of geometry we were passed.
+   * @param  arr  Geometry `Array` (contents depends on the Feature type)
+   * @return  'point', 'line', 'polygon' or null
+   */
+  _inferType(data) {
+    const a = Array.isArray(data) &amp;&amp; data[0];
+    if (typeof a === 'number') return 'point';
+
+    const b = Array.isArray(a) &amp;&amp; a[0];
+    if (typeof b === 'number') return 'line';
+
+    const c = Array.isArray(b) &amp;&amp; b[0];
+    if (typeof c === 'number') return 'polygon';
+
+    return null;
+  }
+
+
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5651,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:35:59 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>

@@ -5302,59 +5302,348 @@
 </div>
 
     <div class="main">
-        <h1 class="page-title" data-filename="index.html">Index</h1>
+        <h1 class="page-title" data-filename="validations_outdated_tags.js.html">Source: validations/outdated_tags.js</h1>
         
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
     <section>
-        <article class="readme content-size"><p><a target="_blank" href="https://github.com/facebook/Rapid/actions?query=workflow%3A%22build%22"><img src="https://github.com/facebook/Rapid/workflows/build/badge.svg" alt="build"></a>
-<a target="_blank" href="https://badge.fury.io/js/%40rapideditor%2Frapid"><img src="https://badge.fury.io/js/%40rapideditor%2Frapid.svg" alt="npm version"></a></p>
-<h1>Rapid</h1>
-<p>Rapid is a web-based modern editor for <a target="_blank" href="https://www.openstreetmap.org/">OpenStreetMap</a>. Rapid integrates advanced mapping tools, authoritative geospatial open data, and cutting-edge technology to empower mappers at all levels to get started quickly, making accurate and fresh edits to maps.</p>
-<p>Rapid is enhanced with authoritative open data sources and AI-generated roads from the Facebook Map With AI service + buildings from Microsoft open buildings dataset to make adding and editing roads, buildings, and more quick and simple.</p>
-<p>Rapid also includes data integrity checks to ensure that new map edits are consistent and accurate. To learn about all the enhanced features Rapid provides, please check out our <a href="CHANGELOG.md">Change Log</a> and <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki#editing-in-rapid">training document</a>.</p>
-<h2>Start mapping</h2>
-<ul>
-<li>Use <a target="_blank" href="https://rapideditor.org/edit">rapideditor.org/edit</a> for the current release.</li>
-<li>Learn more at <a target="_blank" href="https://rapideditor.org">rapideditor.org</a>.</li>
-</ul>
-<h2>Participate!</h2>
-<ul>
-<li>Read the project <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and <a href="CONTRIBUTING.md">Contributing Guide</a> to learn about how to contribute.</li>
-<li>See <a target="_blank" href="https://github.com/facebook/Rapid/issues?state=open">open issues in the issue tracker</a> if you're looking to help on issues.</li>
-<li>To help with internationalization, please follow the <a target="_blank" href="https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating">general translating page in iD repo</a>.</li>
-</ul>
-<p>We're available to chat!  Ping us on the <code>#rapid_feedback</code> channel on either:</p>
-<ul>
-<li><a target="_blank" href="https://slack.openstreetmap.us/">OpenStreetMap US Slack</a></li>
-<li><a target="_blank" href="https://slack.hotosm.org/">HOTOSM Slack</a></li>
-</ul>
-<h2>Country Data Requests</h2>
-<p>To request Rapid data for other countries, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Features Requests</h2>
-<p>To request new features in Rapid to enhance your map editing workflow, please submit <a target="_blank" href="https://github.com/facebook/Rapid/issues/new">a new issue</a>.</p>
-<h2>Available Countries for AI-generated Roads</h2>
-<p>Please refer to this <a target="_blank" href="https://github.com/facebookmicrosites/Open-Mapping-At-Facebook/wiki/Available-Countries">list of Available Countries</a>. If you would like to request roads for a new country, please <a target="_blank" href="https://github.com/facebook/Rapid/issues">create an issue here</a> in this Rapid repo (not in other repos). We track all the requests and our progress on <a href="COUNTRY_REQUESTS.md">this page</a>.</p>
-<h2>License</h2>
-<p>Rapid is available under the <a target="_blank" href="https://opensource.org/licenses/ISC">ISC License</a>.
-See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
+        <header>
+            <div class="header content-size">
+                <h2>validations/outdated_tags.js</h2>
+            </div>
+        </header>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>import { utilHashcode, utilTagDiff } from '@rapid-sdk/util';
+
+import { actionChangePreset } from '../actions/change_preset';
+import { actionChangeTags } from '../actions/change_tags';
+import { actionUpgradeTags } from '../actions/upgrade_tags';
+import { osmIsOldMultipolygonOuterMember, osmOldMultipolygonOuterMemberOfRelation } from '../osm/multipolygon';
+import { ValidationIssue, ValidationFix } from '../core/lib';
+
+
+export function validationOutdatedTags(context) {
+  const type = 'outdated_tags';
+  const dataloader = context.systems.dataloader;
+  const editor = context.systems.editor;
+  const l10n = context.systems.l10n;
+  const presets = context.systems.presets;
+
+  let _waitingForDeprecated = true;
+  let _dataDeprecated;
+
+  // fetch deprecated tags
+  dataloader.getDataAsync('deprecated')
+    .then(d => _dataDeprecated = d)
+    .catch(() => { /* ignore */ })
+    .finally(() => _waitingForDeprecated = false);
+
+
+  /**
+   * oldTagIssues
+   */
+  function oldTagIssues(entity, graph) {
+    if (!entity.hasInterestingTags()) return [];
+
+    let preset = presets.match(entity, graph);
+    if (!preset) return [];
+
+    const oldTags = Object.assign({}, entity.tags);  // shallow copy
+    let subtype = 'deprecated_tags';
+
+    // Upgrade preset, if a replacement is available..
+    if (preset.replacement) {
+      const newPreset = presets.item(preset.replacement);
+      graph = actionChangePreset(entity.id, preset, newPreset, true /* skip field defaults */)(graph);
+      entity = graph.entity(entity.id);
+      preset = newPreset;
+    }
+
+    // Upgrade deprecated tags..
+    if (_dataDeprecated) {
+      const deprecatedTags = entity.deprecatedTags(_dataDeprecated);
+      if (deprecatedTags.length) {
+        deprecatedTags.forEach(tag => {
+          graph = actionUpgradeTags(entity.id, tag.old, tag.replace)(graph);
+        });
+        entity = graph.entity(entity.id);
+      }
+    }
+
+    // Add missing addTags from the detected preset
+    let newTags = Object.assign({}, entity.tags);  // shallow copy
+    if (preset.tags !== preset.addTags) {
+      Object.keys(preset.addTags).forEach(k => {
+        if (!newTags[k]) {
+          if (preset.addTags[k] === '*') {
+            newTags[k] = 'yes';
+          } else {
+            newTags[k] = preset.addTags[k];
+          }
+        }
+      });
+    }
+
+    // Attempt to match a canonical record in the name-suggestion-index.
+    const nsi = context.services.nsi;
+    let waitingForNsi = false;
+    let nsiResult;
+    if (nsi) {
+      waitingForNsi = (nsi.status === 'loading');
+      if (!waitingForNsi) {
+        const loc = entity.extent(graph).center();
+        nsiResult = nsi.upgradeTags(newTags, loc);
+        if (nsiResult) {
+          newTags = nsiResult.newTags;
+          subtype = 'noncanonical_brand';
+        }
+      }
+    }
+
+    let issues = [];
+    issues.provisional = (_waitingForDeprecated || waitingForNsi);
+
+    // determine diff
+    const tagDiff = utilTagDiff(oldTags, newTags);
+    if (!tagDiff.length) return issues;
+
+    const isOnlyAddingTags = tagDiff.every(d => d.type === '+');
+
+    let prefix = '';
+    if (nsiResult) {
+      prefix = 'noncanonical_brand.';
+    } else if (subtype === 'deprecated_tags' &amp;&amp; isOnlyAddingTags) {
+      subtype = 'incomplete_tags';
+      prefix = 'incomplete.';
+    }
+
+    let autoArgs = [doTagUpgrade, l10n.t('issues.fix.upgrade_tags.annotation')];
+
+    issues.push(new ValidationIssue(context, {
+      type: type,
+      subtype: subtype,
+      severity: 'warning',
+      message: showUpgradeMessage,
+      reference: showUpgradeReference,
+      entityIds: [entity.id],
+      hash: utilHashcode(JSON.stringify(tagDiff)),
+      autoArgs: autoArgs,
+      dynamicFixes: () => {
+        let fixes = [
+          new ValidationFix({
+            autoArgs: autoArgs,
+            title: l10n.tHtml('issues.fix.upgrade_tags.title'),
+            onClick: () => {
+              editor.perform(doTagUpgrade);
+              editor.commit({
+                annotation: l10n.t('issues.fix.upgrade_tags.annotation'),
+                selectedIDs: [entity.id]
+              });
+            }
+          })
+        ];
+
+        const item = nsiResult?.matched;
+        if (item) {
+          fixes.push(
+            new ValidationFix({
+              title: l10n.tHtml('issues.fix.tag_as_not.title', { name: item.displayName }),
+              onClick: () => {
+                editor.perform(addNotTag);
+                editor.commit({
+                  annotation: l10n.t('issues.fix.tag_as_not.annotation'),
+                  selectedIDs: [entity.id]
+                });
+              }
+            })
+          );
+        }
+        return fixes;
+
+      }
+    }));
+    return issues;
+
+
+    function doTagUpgrade(graph) {
+      const currEntity = graph.hasEntity(entity.id);
+      if (!currEntity) return graph;
+
+      const newTags = Object.assign({}, currEntity.tags);  // shallow copy
+      tagDiff.forEach(diff => {
+        if (diff.type === '-') {
+          delete newTags[diff.key];
+        } else if (diff.type === '+') {
+          newTags[diff.key] = diff.newVal;
+        }
+      });
+
+      return actionChangeTags(currEntity.id, newTags)(graph);
+    }
+
+
+    function addNotTag(graph) {
+      const currEntity = graph.hasEntity(entity.id);
+      if (!currEntity) return graph;
+
+      const item = nsiResult?.matched;
+      if (!item) return graph;
+
+      const newTags = Object.assign({}, currEntity.tags);  // shallow copy
+      const wd = item.mainTag;     // e.g. `brand:wikidata`
+      const notwd = `not:${wd}`;   // e.g. `not:brand:wikidata`
+      const qid = item.tags[wd];
+      newTags[notwd] = qid;
+
+      if (newTags[wd] === qid) {   // if `brand:wikidata` was set to that qid
+        const wp = item.mainTag.replace('wikidata', 'wikipedia');
+        delete newTags[wd];        // remove `brand:wikidata`
+        delete newTags[wp];        // remove `brand:wikipedia`
+      }
+
+      return actionChangeTags(currEntity.id, newTags)(graph);
+    }
+
+
+    function showUpgradeMessage() {
+      const graph = editor.staging.graph;
+      const currEntity = graph.hasEntity(entity.id);
+      if (!currEntity) return '';
+
+      let messageID = `issues.outdated_tags.${prefix}message`;
+      if (subtype === 'noncanonical_brand' &amp;&amp; isOnlyAddingTags) {
+        messageID += '_incomplete';
+      }
+      return l10n.tHtml(messageID, {
+        feature: l10n.displayLabel(currEntity, graph, true /* verbose */)
+      });
+    }
+
+
+    function showUpgradeReference(selection) {
+      let enter = selection.selectAll('.issue-reference')
+        .data([0])
+        .enter();
+
+      enter
+        .append('div')
+        .attr('class', 'issue-reference')
+        .html(l10n.tHtml(`issues.outdated_tags.${prefix}reference`));
+
+      enter
+        .append('strong')
+        .html(l10n.tHtml('issues.suggested'));
+
+      enter
+        .append('table')
+        .attr('class', 'tagDiff-table')
+        .selectAll('.tagDiff-row')
+        .data(tagDiff)
+        .enter()
+        .append('tr')
+        .attr('class', 'tagDiff-row')
+        .append('td')
+        .attr('class', d => {
+          const klass = (d.type === '+') ? 'add' : 'remove';
+          return `tagDiff-cell tagDiff-cell-${klass}`;
+        })
+        .html(d => d.display);
+    }
+  }
+
+
+  /**
+   * oldMultipolygonIssues
+   */
+  function oldMultipolygonIssues(entity, graph) {
+    let multipolygon, outerWay;
+    if (entity.type === 'relation') {
+      outerWay = osmOldMultipolygonOuterMemberOfRelation(entity, graph);
+      multipolygon = entity;
+    } else if (entity.type === 'way') {
+      multipolygon = osmIsOldMultipolygonOuterMember(entity, graph);
+      outerWay = entity;
+    } else {
+      return [];
+    }
+
+    if (!multipolygon || !outerWay) return [];
+
+    return [new ValidationIssue(context, {
+      type: type,
+      subtype: 'old_multipolygon',
+      severity: 'warning',
+      message: showMultipolygonMessage,
+      reference: showMultipolygonReference,
+      entityIds: [outerWay.id, multipolygon.id],
+      autoArgs: [doMultipolygonUpgrade, l10n.t('issues.fix.move_tags.annotation')],
+      dynamicFixes: () => {
+        return [
+          new ValidationFix({
+            // autoArgs: [doMultipolygonUpgrade, l10n.t('issues.fix.move_tags.annotation')],
+            title: l10n.t('issues.fix.move_tags.title'),
+            onClick: () => {
+              editor.perform(doMultipolygonUpgrade);
+              editor.commit({
+                annotation: l10n.t('issues.fix.move_tags.annotation'),
+                selectedIDs: [entity.id]
+              });
+            }
+          })
+        ];
+      }
+    })];
+
+
+    function doMultipolygonUpgrade(graph) {
+      let currMultipolygon = graph.hasEntity(multipolygon.id);
+      let currOuterWay = graph.hasEntity(outerWay.id);
+      if (!currMultipolygon || !currOuterWay) return graph;
+
+      currMultipolygon = currMultipolygon.mergeTags(currOuterWay.tags);
+      graph = graph.replace(currMultipolygon);
+      return actionChangeTags(currOuterWay.id, {})(graph);
+    }
+
+
+    function showMultipolygonMessage() {
+      const graph = editor.staging.graph;
+      let currMultipolygon = graph.hasEntity(multipolygon.id);
+      if (!currMultipolygon) return '';
+
+      return l10n.tHtml('issues.old_multipolygon.message',
+          { multipolygon: l10n.displayLabel(currMultipolygon, graph, true) }   // true = verbose
+      );
+    }
+
+
+    function showMultipolygonReference(selection) {
+      selection.selectAll('.issue-reference')
+        .data([0])
+        .enter()
+        .append('div')
+        .attr('class', 'issue-reference')
+        .html(l10n.tHtml('issues.old_multipolygon.reference'));
+    }
+  }
+
+
+  let validation = function checkOutdatedTags(entity, graph) {
+    let issues = oldMultipolygonIssues(entity, graph);
+    if (!issues.length) {
+      issues = oldTagIssues(entity, graph);
+    }
+    return issues;
+  };
+
+
+  validation.type = type;
+
+  return validation;
+}
+</code></pre>
+        </article>
     </section>
 
 
@@ -5366,7 +5655,7 @@ See the <a href="LICENSE.md">LICENSE.md</a> file for more details.</p></article>
 
         <footer class="content-size">
             <div class="footer">
-                Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
+                Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Oct 25 2023 14:36:00 GMT-0500 (Central Daylight Time)
             </div>
         </footer>
     </div>
