@@ -14,12 +14,13 @@ export function uiMapRouletteDetails(context) {
   let _qaItem;
 
 
-  function issueString(d, type) {
+  function taskString(d, type) {
     if (!maproulette || !d) return '';
 
     // Issue strings are cached from MapRoulette API
-    const s = maproulette.getStrings(d.itemType);
-    return (type in s) ? s[type] : '';
+    // const s = maproulette.getStrings(d.itemType);
+    // return (type in s) ? s[type] : '';
+    return null;
   }
 
 
@@ -36,7 +37,7 @@ export function uiMapRouletteDetails(context) {
 
 
     // Description
-    if (issueString(_qaItem, 'detail')) {
+    if (_qaItem.task.parentName) {
       const div = detailsEnter
         .append('div')
         .attr('class', 'qa-details-subsection');
@@ -48,7 +49,7 @@ export function uiMapRouletteDetails(context) {
       div
         .append('p')
         .attr('class', 'qa-details-description-text')
-        .html(d => issueString(d, 'detail'))
+        .html(d => _qaItem.task.parentName)
         .selectAll('a')
         .attr('rel', 'noopener')
         .attr('target', '_blank');
@@ -64,7 +65,7 @@ export function uiMapRouletteDetails(context) {
       .attr('class', 'qa-details-subsection');
 
     // Suggested Fix (mustn't exist for every issue type)
-    if (issueString(_qaItem, 'fix')) {
+    if (taskString(_qaItem, 'fix')) {
       const div = detailsEnter
         .append('div')
         .attr('class', 'qa-details-subsection');
@@ -75,14 +76,14 @@ export function uiMapRouletteDetails(context) {
 
       div
         .append('p')
-        .html(d => issueString(d, 'fix'))
+        .html(d => taskString(d, 'fix'))
         .selectAll('a')
         .attr('rel', 'noopener')
         .attr('target', '_blank');
     }
 
     // Common Pitfalls (mustn't exist for every issue type)
-    if (issueString(_qaItem, 'trap')) {
+    if (taskString(_qaItem, 'trap')) {
       const div = detailsEnter
         .append('div')
         .attr('class', 'qa-details-subsection');
@@ -93,7 +94,7 @@ export function uiMapRouletteDetails(context) {
 
       div
         .append('p')
-        .html(d => issueString(d, 'trap'))
+        .html(d => taskString(d, 'trap'))
         .selectAll('a')
         .attr('rel', 'noopener')
         .attr('target', '_blank');
@@ -101,23 +102,23 @@ export function uiMapRouletteDetails(context) {
 
     // Save current item to check if UI changed by time request resolves
     if (!maproulette) return;
-    maproulette.loadIssueDetailAsync(_qaItem)
+    maproulette.loadTaskDetailAsync(_qaItem)
       .then(d => {
         // Do nothing if _qaItem has changed by the time Promise resolves
         if (_qaItem.id !== d.id) return;
 
         // No details to add if there are no associated issue elements
-        if (!d.elems || d.elems.length === 0) return;
+        if (!d.task) return;
 
         // Things like keys and values are dynamically added to a subtitle string
-        if (d.detail) {
+        if (d.details.instruction) {
           detailsDiv
             .append('h4')
             .html(l10n.tHtml('QA.maproulette.detail_title'));
 
           detailsDiv
             .append('p')
-            .html(d => d.detail)
+            .html(d => d.details.instruction)
             .selectAll('a')
             .attr('rel', 'noopener')
             .attr('target', '_blank');
