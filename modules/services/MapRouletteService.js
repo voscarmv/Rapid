@@ -189,7 +189,7 @@ export class MapRouletteService extends AbstractSystem {
   }
 
 
-  /**
+  /***
    * postUpdate
    * @param   issue
    * @param   callback
